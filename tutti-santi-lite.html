@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Tutti Santi Gdańsk – Wiedza i standardy</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .phone-frame {
+            width: 100%;
+            max-width: 390px;
+            height: 840px;
+            background: #1a1a1a;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 8px solid #333;
+            position: relative;
+        }
+
+        .auth-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+        .auth-screen.hidden { display: none; }
+        .auth-logo { font-size: 36px; margin-bottom: 10px; }
+        .auth-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+        .auth-subtitle { font-size: 12px; color: #888; margin-bottom: 30px; }
+        .auth-btn {
+            width: 100%;
+            background: #242424;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .auth-btn.primary { background: #d4ac0d; color: #111; border-color: #d4ac0d; }
+        .sub-auth-box {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+            background: #222;
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid #333;
+        }
+        .sub-auth-box label { font-size: 11px; color: #aaa; }
+        .sub-auth-box select {
+            width: 100%;
+            background: #2c2c2c;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 18px 20px 10px 20px;
+            padding-top: 30px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .user-info { display: flex; justify-content: space-between; align-items: center; }
+        .user-name { font-size: 15px; font-weight: 600; }
+        .restaurant-location { font-size: 11px; color: #d4ac0d; font-weight: 500; margin-top: 2px; }
+        .user-role {
+            font-size: 10px;
+            background: #c0392b;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .profile-switcher {
+            background: #222;
+            padding: 7px 12px;
+            border-bottom: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #aaa;
+        }
+        .content { flex: 1; padding: 16px; overflow-y: auto; }
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .menu-item {
+            background: #222222;
+            border: 1px solid #2c2c2c;
+            padding: 20px 12px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .menu-item:hover { background: #2a2a2a; border-color: #d4ac0d; }
+        .menu-icon { font-size: 26px; margin-bottom: 8px; }
+        .menu-text { font-size: 12px; font-weight: 600; color: #fff; }
+        .menu-badge {
+            position: absolute; top: 8px; right: 8px;
+            min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
+            background: #e74c3c; display: none; color: #fff; font-size: 10px; font-weight: 700;
+            align-items: center; justify-content: center;
+            box-shadow: 0 0 0 2px #222222;
+        }
+        .menu-badge.show { display: flex; }
+
+        .nav-bar {
+            background: #161616;
+            border-top: 1px solid #282828;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            padding-bottom: 10px;
+        }
+        .nav-item { font-size: 20px; cursor: pointer; opacity: 0.4; position: relative; }
+        .nav-item.active { opacity: 1; }
+        .nav-dot {
+            position: absolute; top: -6px; right: -10px;
+            min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
+            background: #e74c3c; display: none; color: #fff; font-size: 9px; font-weight: 700;
+            align-items: center; justify-content: center;
+        }
+        .nav-dot.show { display: flex; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .back-btn {
+            background: none;
+            border: none;
+            color: #d4ac0d;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Akordeony i elementy */
+        .rules-accordion, .manual-category, .wine-card {
+            background: #202020;
+            border: 1px solid #2c2c2c;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .rules-header, .manual-header {
+            padding: 12px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #d4ac0d;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #242424;
+        }
+        .rules-content, .manual-content {
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #ccc;
+            line-height: 1.5;
+            display: none;
+            border-top: 1px solid #2c2c2c;
+        }
+        .rules-accordion.open .rules-content, .manual-category.open .manual-content { display: block; }
+
+        .wine-card { padding: 12px; }
+        .wine-name { font-size: 13px; font-weight: 600; color: #d4ac0d; margin-bottom: 4px; }
+        .wine-details { font-size: 11px; color: #bbb; line-height: 1.4; }
+        .wine-section-title { font-size: 13px; font-weight: 700; color: #fff; margin: 16px 0 8px 0; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 4px; }
+
+        /* Komunikator */
+        .chat-channels { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .channel-tab {
+            background: #222; border: 1px solid #333; color: #aaa;
+            padding: 8px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;
+            cursor: pointer; flex: 1; text-align: center; min-width: 30%;
+            position: relative;
+        }
+        .channel-tab.active { background: #d4ac0d; color: #111; border-color: #d4ac0d; }
+        .channel-dot {
+            position: absolute; top: -6px; right: -6px;
+            min-width: 15px; height: 15px; padding: 0 3px; border-radius: 8px;
+            background: #e74c3c; display: none; color: #fff; font-size: 9px; font-weight: 700;
+            align-items: center; justify-content: center;
+            box-shadow: 0 0 0 2px #161616;
+        }
+        .channel-dot.show { display: flex; }
+        .chat-status { font-size: 10px; color: #666; margin-bottom: 8px; text-align: center; }
+        .chat-messages { background: #202020; border: 1px solid #2c2c2c; border-radius: 12px; height: 330px; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .message { background: #282828; padding: 8px 10px; border-radius: 8px; font-size: 12px; }
+        .msg-author { font-weight: 600; color: #d4ac0d; font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 3px; }
+        .msg-time { color: #666; font-size: 10px; }
+        .chat-input-area { display: flex; gap: 8px; }
+        .chat-input-area input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 9px; border-radius: 8px; font-size: 12px; }
+        .chat-input-area button { background: #d4ac0d; color: #111; border: none; padding: 0 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; }
+        .chat-input-area button:disabled { opacity: 0.5; cursor: default; }
+        .pinned-banner {
+            background: #2a220a; border: 1px solid #d4ac0d; border-radius: 8px;
+            padding: 8px 10px; font-size: 11px; color: #f0d060; margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+        }
+        .pinned-banner button { background: none; border: none; color: #f0d060; cursor: pointer; font-size: 11px; }
+        .task-item, .report-item {
+            background: #202020; border: 1px solid #2c2c2c; border-radius: 10px;
+            padding: 10px; margin-bottom: 8px; font-size: 12px; color: #ccc;
+        }
+        .task-item .task-title { font-weight: 600; color: #fff; margin-bottom: 4px; }
+        .task-meta { font-size: 11px; color: #999; display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .task-meta select { background: #2c2c2c; color: #fff; border: 1px solid #444; border-radius: 6px; font-size: 11px; padding: 3px 6px; }
+        .status-pill { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+        .status-todo { background: #444; color: #ddd; }
+        .status-progress { background: #6b5510; color: #ffe08a; }
+        .status-done { background: #1e5c33; color: #9be8ae; }
+        .home-search-input {
+            width: 100%; background: #202020; border: 1px solid #2c2c2c; color: #fff;
+            padding: 12px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 12px;
+        }
+        .home-search-input:focus { outline: none; border-color: #d4ac0d; }
+        .search-results { margin-bottom: 14px; }
+        .search-result {
+            background: #202020; border: 1px solid #2c2c2c; border-radius: 10px;
+            padding: 10px; margin-bottom: 6px; cursor: pointer;
+        }
+        .search-result:hover, .search-result:active { border-color: #d4ac0d; }
+        .search-result .task-title { color: #d4ac0d; }
+    
+        .daily-card { min-height:80px; }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="user-info">
+                <div>
+                    <div class="user-name">Tutti Santi 🍕</div>
+                    <div class="restaurant-location">Wiedza i standardy pracy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="screen-home" class="screen active">
+                <input type="text" id="home-search" class="home-search-input" placeholder="🔍 Szukaj np. „pizza jest zimna”, alergeny, wino...">
+                <div id="search-results" class="search-results" style="display:none;"></div>
+                <div class="section-title">Menu główne aplikacji</div>
+                <div class="grid-menu">
+                    <div class="menu-item" onclick="switchScreen('screen-start')">
+                        <div class="menu-icon">📌</div>
+                        <div class="menu-text">Na dziś</div>
+                    </div>
+                    <div class="menu-item" onclick="switchScreen('screen-menu')">
+                        <div class="menu-icon">🍕</div>
+                        <div class="menu-text">Menu</div>
+                    </div>
+                    <div class="menu-item" onclick="switchScreen('screen-wina')">
+                        <div class="menu-icon">🍷</div>
+                        <div class="menu-text">Karta Win i Alkoholi</div>
+                    </div>
+                    <div class="menu-item" onclick="switchScreen('screen-zasady')">
+                        <div class="menu-icon">📜</div>
+                        <div class="menu-text">Zasady restauracji</div>
+                    </div>
+                    <div class="menu-item" onclick="switchScreen('screen-baza')">
+                        <div class="menu-icon">📖</div>
+                        <div class="menu-text">Baza wiedzy</div>
+                    </div>
+                    <div class="menu-item" onclick="switchScreen('screen-audyt')">
+                        <div class="menu-icon">🎯</div>
+                        <div class="menu-text">Audyt</div>
+                    </div>
+                    <div class="menu-item" onclick="switchScreen('screen-test')">
+                        <div class="menu-icon">📝</div>
+                        <div class="menu-text">Test wiedzy</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-start" class="screen">
+                <button class="back-btn" onclick="switchScreen('screen-home')">← Powrót do menu</button>
+                <div class="section-title">📌 Przypomnienie na dziś</div>
+                <p style="font-size:12px; color:#999; margin-bottom:12px;">Codziennie inna pozycja do zapamiętania.</p>
+                <div class="task-item daily-card">
+                    <div class="task-title" id="daily-title" style="font-size:15px; color:#d4ac0d;"></div>
+                    <div id="daily-text" style="margin-top:8px; font-size:13px; line-height:1.5;"></div>
+                </div>
+                <button class="auth-btn" style="margin-top:12px;" onclick="showAnotherDaily()">Pokaż inny przykład</button>
+            </div>
+
+            <div id="screen-menu" class="screen">
+                <button class="back-btn" onclick="switchScreen('screen-home')">← Powrót do menu</button>
+                <div class="section-title">🍕 Menu restauracji</div>
+                <div id="menu-list"></div>
+            </div>
+
+            <div id="screen-wina" class="screen">
+                <button class="back-btn" onclick="switchScreen('screen-home')">← Powrót do menu</button>
+                <div class="section-title">🍷 Karta Win i Standardy Alkoholi</div>
+
+                <div class="rules-accordion">
+                    <div class="rules-header" onclick="toggleAccordion(this)"><span>ℹ️ Standardy i temperatury serwowania alkoholi</span><span>▼</span></div>
+                    <div class="rules-content">
+                        <p>• <strong>Wydawanie kart:</strong> 1 osoba – 1 karta, 2–5 osób – 2 karty, 6–10 osób – 3 karty, 11–15 osób – 4 karty (proporcjonalnie). Karty nie wydajemy niepełnoletnim. Po przyjęciu zamówienia zostawiamy 1 kartę na stole obok głównej.</p>
+                        <p>• <strong>Temperatury:</strong> Wino białe / Prosecco / Moët: 7-10°C | Wino czerwone: 17-19°C | Wódka: 6-10°C.</p>
+                        <p>• <strong>Nowości / Inne:</strong> Wódka Belvedere na shoty, Żubrówka Czarna na kieliszki, Aperitivo Spritz 0% i Prosecco Lamia 0%. Alkohol na wynos: <strong>nadal brak sprzedaży na wynos</strong>.</p>
+                    </div>
+                </div>
+
+                <div class="wine-section-title">Wina Musujące / Prosecco</div>
+                <div class="wine-card">
+                    <div class="wine-name">Prosecco Lamia</div>
+                    <div class="wine-details">
+                        • <strong>Typ:</strong> Białe wino musujące, Extra Dry (półwytrawne), 11% alk.<br>
+                        • <strong>Szczep / Pochodzenie:</strong> Glera / Włochy (metoda Charmat).<br>
+                        • <strong>Aromat i smak:</strong> Świeży, nuty jabłek, gruszek i kwiatów akacji. Lekki, zbalansowany, dobra kwasowość.<br>
+                        • <strong>Temperatura:</strong> 8-10°C
+                    </div>
+                </div>
+
+                <div class="wine-section-title">Wina Białe</div>
+                <div class="wine-card">
+                    <div class="wine-name">Grechetto „Le Ripaie” (IGT Umbria)</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Aromatyczny nos (jabłka, akcenty różane), średnia budowa, rajskie jabłuszka na finiszu. Dojrzewa 3 m-ce na osadzie.<br>• <strong>Polecane do:</strong> Rukola, Margherita con Bufala.<br>• <strong>Wymowa:</strong> greketto le ree-pah-je, Tenute Baldo (te-noo-te bal-do)</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Negroamaro Bianco Organic „Maidomo” (IGP Puglia)</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Białe wino z czerwonych winogron, ekologiczne. Cytrusy, nuty wiśni, śliwek i jagód. Soczyste, korzenne.<br>• <strong>Polecane do:</strong> Focaccia Superiore z rozmarynem, Spinaci e Ricotta, Salame Dolce Italy.<br>• <strong>Wymowa:</strong> ne-gro-ama-ro bianko organik maj-do-mo, Tenuta Viglione (te-noo-ta wiljo-ne)</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Chardonnay & Viognier „Bar Siciliano” (IGP Terre Siciliane)</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Owoce tropikalne, cytrusy, wanilia, dojrzały ananas i brzoskwinia. 20% wina dojrzewa w dębie, wegańskie.<br>• <strong>Polecane do:</strong> Krem z pomidorów, Santa Clara, San Pietro, Hawai, Insalata Verdure e Gamberi.<br>• <strong>Wymowa:</strong> szardonej i vijonie bar sycyliano, Trementi (tre-men-ti)</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Sauvignon Blanc „Genio Español Zero” (Bezalkoholowe, Hiszpania)</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Świeży aromat liści porzeczki, dojrzały agrest, marakuja. Rześki smak winogron.<br>• <strong>Wymowa:</strong> so-winjon blą gie-nio es-pa-niol zero, Familia Bastida</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Vermentino (IGT Toscana, Il Palazzo) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Intensywny aromat cytrusów, szałwii i rozmarynu. Świeży, gładki z mineralnym akcentem.<br>• <strong>Polecane do:</strong> Olive della casa, Capricciosa, Insalata di Carpaccio, Insalata dalla Grecia, Parmigiano Reggiano Pasta.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Trebbiano & Chardonnay „Figlio della Luna” (DOC Torgiano) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Białe kwiaty, cytryny, jabłka, ananas. Zaskakująca gęstość i oleistość w ustach.<br>• <strong>Polecane do:</strong> Sant’ Andrea, Insalata Pesca con Carne.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Sauvignon Blanc (DOC Colli Orientali del Friuli, Vigna Traverso) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Liście pomidorowe, pieprz, mięta, brzoskwinia. Pełne, mineralne.<br>• <strong>Polecane do:</strong> Gamberetti con Burro, Carciofi e Bufala, Margherita, Pomodorini e Gamberetti.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Pecorino Organic „Senza Solfiti” (IGT Terre di Chieti, Jasci) – bez siarki, wegańskie</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Nabiał, morele, jabłka, obfite, kremowe, apteczno-ziołowy finisze.<br>• <strong>Polecane do:</strong> Santa Lucia, Abruzja, Verdure Miste.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Fiano Organic „Maioliche” (IGP Puglia, Tenuta Viglione) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Białe kwaskowe owoce, ziołowość, okrągłe i orzeźwiające usta.<br>• <strong>Polecane do:</strong> Insalata Mare e Monti, San Giorgio.</div>
+                </div>
+
+                <div class="wine-section-title">Wina Czerwone</div>
+                <div class="wine-card">
+                    <div class="wine-name">Sangiovese „Le Ripaie” (IGT Umbria)</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Czerwone owoce, różowy pieprz, usta łagodne z małą taniną.<br>• <strong>Polecane do:</strong> Prosciutto, Spaghetti Rossi.<br>• <strong>Wymowa:</strong> san-dżo-we-ze le ree-pah-je, Tenute Baldo</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Primitivo Organic „Sellato” (DOP Gioia del Colle, Tenuta Viglione)</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Czerwone owoce, ściółka leśna, figa, gorzki migdał. 30% wina dojrzewa 12 m-cy w dębie.<br>• <strong>Polecane do:</strong> Santa Rosalia, Prosciutto e Salame, Prosciutto e Funghi, Lasagna della Mamma.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Nero d`Avola & Cabernet Sauvignon „Bar Sicilia” (DOP Sicilia, Trementi)</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Jagody, jeżyny, czekolada, kawa, czarny pieprz. 25% w dębie, wegańskie.<br>• <strong>Polecane do:</strong> Spinaci e Ventricina, Salame Picante.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Tempranillo „Genio Español Zero” (Bezalkoholowe, Hiszpania)</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Czerwone owoce, ziemisty akcent, miękka delikatna tanina.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Cabernet Sauvignon (IGT Trevenezie, Ai Palazzi) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Dżem z czerwonych owoców, tymianek, rozmaryn, lawenda.<br>• <strong>Polecane do:</strong> Quattro Formaggi Plus, Calzone Valerio.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Valpolicella Classico Superiore Ripasso (DOC, Monte del Frà) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Czereśnie, suszone śliwki, karmel, kakao. Dojrzewa 18 m-cy.<br>• <strong>Polecane do:</strong> San Michele, Tartufo, Parma e Tartufa.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Amarone della Valpolicella Classico (DOCG, Monte del Frà) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Suszone owoce, słodkie przyprawy, duża gęstość i koncentracja (odsuszane grona, 30 m-cy w beczce).<br>• <strong>Polecane do:</strong> San Marco, San Giovanni, Tagliatelle con Ragù Bolognese.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Chianti Classico Riserva Organic (DOCG, Castello di Verrazzano) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Dojrzałe czerwone owoce, tytoń, czarny pieprz. Dojrzewa 24 m-ce.<br>• <strong>Polecane do:</strong> Parma, Quattro Formaggi.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Brunello di Montalcino (DOCG, Donatella Cinelli Colombini) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Szlachetne drewno, dojrzałe owoce, wyrafinowany i długi smak (30 m-cy w dębie).<br>• <strong>Polecane do:</strong> Santa Rita.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Montepulciano Organic „Senza Solfiti” (DOC, Jasci) – bez siarki, wegańskie</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Soczyste wiśnie, świeże i wędzone śliwki, mineralne zakończenie.<br>• <strong>Polecane do:</strong> Funghi Misti, Quattro Stagioni.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Nero di Troia Organic „Maioliche” (IGP Puglia, Tenuta Viglione) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Jeżyna, wiśnia w alkoholu, korzenne nuty (4 m-ce w dębie).<br>• <strong>Polecane do:</strong> San Sebastiano, Pancetta, Pancetta e Salame.</div>
+                </div>
+                <div class="wine-card">
+                    <div class="wine-name">Primitivo „Papale Linea Oro” (DOP Manduria, Varvaglione) – tylko butelki</div>
+                    <div class="wine-details">• <strong>Profil:</strong> Dżem figowy, czereśnie, ciemna czekolada (12 m-cy w beczce).<br>• <strong>Polecane do:</strong> Deska dojrzewających wędlin i serów, San Antonio, San Luca.</div>
+                </div>
+            </div>
+
+            <div id="screen-zasady" class="screen">
+                <button class="back-btn" onclick="switchScreen('screen-home')">← Powrót do menu</button>
+                <div class="section-title">📜 Zasady restauracji</div>
+
+                <div class="rules-accordion">
+                    <div class="rules-header" onclick="toggleAccordion(this)"><span>🍕 Pizza Gourmet i Zasady Wydawania</span><span>▼</span></div>
+                    <div class="rules-content">
+                        <p>• <strong>Godziny sprzedaży:</strong> 13:00–20:30. Jeśli gość pyta wcześniej, można zapytać chłopaków na kuchni, czy da radę zrobić wcześniej/później.</p>
+                        <p>• <strong>Na wynos:</strong> Co do zasady pizzy gourmet nie sprzedajemy na wynos (dla zachowania wyglądu i smaku). Jeśli gość bardzo nalega – robimy na jego odpowiedzialność. Wyjątek bezwzględny: <strong>Lorenzo – nigdy na wynos</strong> (surowe mięso).</p>
+                        <p>• <strong>Modyfikacje:</strong> Nie modyfikujemy składowych gourmet (np. Santa Clara / Santa Rita – brak modyfikacji).</p>
+                        <p>• <strong>Sosy i spody:</strong> Nie wymieniamy sosu pomidorowego na śmietanowy/truflowy. Sos pomidorowy nie idzie do stolika bez obróbki termicznej.</p>
+                        <p>• <strong>Pizza bezglutenowa:</strong> Na miejscu oznaczamy chorągiewką, na wynos – naklejką. Zawsze informujemy gościa.</p>
+                    </div>
+                </div>
+
+                <div class="rules-accordion">
+                    <div class="rules-header" onclick="toggleAccordion(this)"><span>⏰ Zamykanie restauracji i organizacja pracy</span><span>▼</span></div>
+                    <div class="rules-content">
+                        <p>• Pierwsza osoba, która otwierała, kończy pracę ok. 20:45.</p>
+                        <p>• Osoba na barze stara się zamknąć do 21:00, żeby pomóc na sali. W wolnym czasie robi daty, dokłada napoje do lodówek, sprawdza kegi i wina.</p>
+                        <p>• O 21:00 obowiązkowa pomoc na sali. Wiadomo, są wyjątki (zostaje się dłużej lub wychodzi wcześniej). <strong>Pomagamy sobie nawzajem!</strong></p>
+                    </div>
+                </div>
+
+                <div class="rules-accordion">
+                    <div class="rules-header" onclick="toggleAccordion(this)"><span>👥 Rezerwacje, Serwis (8+ osób) i Płatności</span><span>▼</span></div>
+                    <div class="rules-content">
+                        <p>• Rezerwacje na 8 osób i powyżej: informujemy od razu o doliczanym serwisie 10%, żeby nikt nie był zaskoczony.</p>
+                        <p>• Rezerwacji na weekendy nie prowadzimy. Sala liczy 25 stolików.</p>
+                        <p>• Limit rezerwacji: PN-CZW (do godziny przed zamknięciem) oraz PT do 16:00. Maksymalnie 25% stolików co 2,5 godziny (do 16:00 max 25 osób, po 16:00 max 15 osób). Od 17:00 do 19:30 może być maksymalnie 6 rezerwacji na stolikach.</p>
+                        <p>• Brak wolnego terminu na rezerwację danego dnia nie oznacza braku możliwości otrzymania stolika — większość stolików jest dostępna bez rezerwacji, warto o tym wspomnieć gościom.</p>
+                        <p>• <strong>Dowody i paragony:</strong> Bezwzględnie sprawdzamy dowód tożsamości przy sprzedaży alkoholu w razie wątpliwości co do pełnoletności. Każdy paragon z kasy fiskalnej musi być oderwany i przekazany gościowi (przy stoliku – osobie płacącej).</p>
+                    </div>
+                </div>
+
+                <div class="rules-accordion">
+                    <div class="rules-header" onclick="toggleAccordion(this)"><span>🚨 Bezpieczeństwo i Segregacja</span><span>▼</span></div>
+                    <div class="rules-content">
+                        <p>• <strong>BEZWZGLĘDNY ZAKAZ:</strong> Nie wolno samodzielnie wpuszczać nikogo nieznajomego na zaplecze restauracji, niezależnie od stanowiska i osoby, za jaką się podaje – w takiej sytuacji pilnie wzywamy managera.</p>
+                        <p>• Restrykcyjna segregacja odpadów (Urząd Miejski w Gdańsku).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-baza" class="screen">
+                <button class="back-btn" onclick="switchScreen('screen-home')">← Powrót do menu</button>
+                <div class="section-title">📖 Baza wiedzy i standardy kelnerskie</div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>1. Czego kelner NIGDY nie powinien robić / mówić</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p><strong>NIGDY nie robi:</strong> Prywatnych rozmów przez telefon, SMS, gry w komórkę; żucia gumy; jedzenia na sali przy gościach; poprawiania urody/higieny na oczach gości; plotkowania o gościach; dotykania gości; mówienia „Ty”; biegania po sali; głaskania obcych psów; mówienia „To nie mój stolik”; przeklinania; prowadzenia rozmów towarzyskich w obecności gości; komentowania tego, co dzieje się na sali (w tym zachowań gości); głośnego zachowywania się i zwracania na siebie uwagi; krzyczenia do gości lub współpracowników; podnoszenia dzieci gości na ręce lub głaskania ich po głowie; pospieszania gości podczas rozmowy; okazywania irytacji.</p>
+                        <p><strong>NIGDY nie mówi:</strong> „Karta, gotówka?” (pytamy pełnym zdaniem); „Zapraszam do POSa” (mówimy: do baru / do komputera); słów negatywnych (chociaż, tylko, ewentualnie, tak mało); „Nie wiem, jestem tu nowy” (nowy kelner ma obowiązek dopytać, nie zostawiać gościa bez odpowiedzi); „Coś jeszcze?” lub „Co podać?”; „Spokojnie...” (może zirytować gościa, który jest spokojny); „Nie ma problemu...” (przyniesienie sztućców to dla nas żaden problem, więc nie sugerujemy, że mogłoby nim być).</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>2. Wiedza o produktach i sekcja kulinarna</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>• <strong>Kelner doradca:</strong> Zna pozycje poza opisem z menu, wskazuje unikatowe składniki (mozzarella di bufala, burrata, bresaola), opisuje receptury.</p>
+                        <p>• <strong>Brak ketchupu / sosu czosnkowego:</strong> Włoska pizza nie psuje się ketchupem. Na życzenie są oliwy własnej receptury (pikantna/czosnkowa).</p>
+                        <p>• <strong>Pizza „pół na pół”:</strong> Tylko w działach klasycznych (wykluczone Quattro Stagioni i Calzone Valerio).</p>
+                        <p>• <strong>Valerio Valle:</strong> Współzałożyciel, twórca sosu i ciasta, szkoleniowiec zespołu.</p>
+                        <p>• <strong>Sos pomidorowy:</strong> 3 składniki (pomidory pelati, sól, oliwa) bez oregano. Neutralny, lekko słodko-kwaśny.</p>
+                        <p>• <strong>Lemoniady:</strong> Świeży sok z cytryny/pomarańczy, woda, cukier trzcinowy + puree (imbir, brzoskwinia, mango).</p>
+                        <p>• <strong>Upselling:</strong> Proponowanie droższych alternatyw (focaccia do sałatki, woda 700ml zamiast 330ml, podwójne espresso, latte zamiast cappuccino).</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>3. Serwowanie wina i zasady higieny</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>• <strong>Wino krok po kroku:</strong> 1. Zabieramy do stolika spodeczek i trybuszon -> 2. Ściągamy folię z szyjki -> 3. Prezentujemy etykietę osobie zamawiającej, wymawiamy pełną nazwę wina -> 4. Otwieramy przy stoliku -> 5. Korek odkładamy na spodeczek -> 6. Nalewamy odrobinę osobie zamawiającej do akceptacji, potem pozostałym gościom (~1/3 kieliszka), nie dotykając szyjką kieliszków -> 7. Stawiamy butelkę etykietą do gości.</p>
+                        <p>• <strong>Higiena:</strong> Nie dotykamy części mających kontakt z żywnością. Talerze za brzegi lub od spodu, szklanki/kieliszki za dno/nóżkę, filiżanki i kubeczki na spodeczkach. Napoje przenosimy na tacach. Lewa ręka nosi sprzęt, prawa serwuje i podaje. Maksymalnie 3 talerze na raz. Do drinków serwetka koktajlowa, do piwa podkładka. Kieliszki/szklanki ustawiamy na tacy tak, by się nie stukały. Tac nie stawiamy na stole. Nie obciążamy tac zbyt mocno, by nie doszło do przechylenia.</p>
+                        <p>• <strong>Alergeny:</strong> Nigdy z pamięci – kelner nigdy nie odpowiada na pytania o alergeny, tylko informuje gościa o możliwości sprawdzenia ich w księdze alergenów (dostępnej w restauracji, jest też w menu na ostatnich stronach). Makarony bez jaj, z wyjątkiem lasagne. Osobom z celiakią nie rekomendujemy nawet pizzy z mąki bezglutenowej – ze względu na obecność produktów pszennych w lokalu mogą pojawić się śladowe ilości glutenu; odsyłamy do konsultacji z lekarzem.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>4. Trudne sytuacje, dzieci i zwierzęta</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>• <strong>Krytyka:</strong> Zachować spokój, wysłuchać, powtórzyć uwagę, nie mówić, że gość nie ma racji, przeprosić bez tłumaczenia i zaproponować rozwiązanie (kawa, deser, wino, manager). Gość musi zawsze wyjść od nas zadowolony.</p>
+                        <p>• <strong>Prewencja („dwa kroki przed katastrofą”):</strong> Jeśli czas oczekiwania na danie jest dłuższy niż zwykle, uprzedzamy o tym gościa od razu przy zamówieniu (można zaproponować przystawkę/sałatkę wcześniej). Gdy goście oglądają danie z niepokojoną miną lub sprawdzają opis w menu – podchodzimy i pytamy, czy wszystko w porządku (mogła być pomyłka). Gdy goście podnoszą kawałek pizzy i oglądają jej spód – możliwe, że pizza jest spalona, przepraszamy i proponujemy nową. Gdy gość odłożył sztućce po jednym-dwóch kęsach – nie przechodzimy obok obojętnie. Kontrola jakości po 4 minutach od podania dania – pytamy otwartym pytaniem („Jak Państwu smakuje?”), nie „czy wszystko ok”, bo dzięki temu wychwycimy problem od razu.</p>
+                        <p>• <strong>Dzieci:</strong> Czyste foteliki owinięte folią spożywczą po każdym użyciu (gotowość dla kolejnego dziecka), firmowe kolorowanki dobrane do wieku i płci dziecka z kompletem zatemperowanych kredek (rozkładane na stole razem z kartami menu), przewijak w toalecie damskiej. Warto zapytać dziecko jak mu smakowała pizza, jak ma na imię, lub pochwalić rysunek – można też przybić mu piątkę.</p>
+                        <p>• <strong>Pets Friendly:</strong> Psy mile widziane. Latem podajemy dla psa miseczkę z wodą. Pies powinien siedzieć na smyczy obok właściciela, pod stołem lub na krześle/kolanach właściciela, być czysty i nie okazywać agresji ani nie zakłócać spokoju szczekaniem. Jeśli pies nagle staje się agresywny i uiada pod stołem, nie podchodzimy do niego – prosimy właściciela o odejście od stołu i natychmiastowe wyprowadzenie pupila. Nigdy nie głaszczemy psów należących do gości.</p>
+                        <p>• <strong>Napiwki:</strong> Nieobowiązkowe – to podziękowanie gości za zaangażowanie, indywidualne podejście, kulturę osobistą i poświęcony czas, nie za samo wykonanie obowiązków. Dzielone wspólnie na cały zespół kelnerski i kuchnię, nie tylko dla obsługującego kelnera. Jeśli gość nie ma gotówki na napiwek, nie okazujemy rozczarowania – możemy zasugerować zostawienie opinii w Google lub TripAdvisor.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>5. Ergonomia pracy na sali</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>Kelner pokonuje dziennie kilka kilometrów po restauracji, dlatego warto wyrobić nawyk robienia kilku rzeczy naraz lub „po drodze": nie robimy „pustych przebiegów" (np. jednocześnie wydajemy napoje i talerzyki); sprzątając stolik, zbieramy na tacę jak najwięcej naczyń naraz; podchodząc do stolika, przy którym siedzi jedna osoba, i tak zabieramy zawsze dwie karty; wynosząc napoje do jednego stolika, drugą ręką podajemy sąsiedniemu stolikowi to, o co właśnie poprosił (np. oliwki smakowe); gdy przy stoliku siedzą dwie osoby dorosłe i dwójka dzieci, od razu dajemy dwie karty, dwie kolorowanki i komplet kredek; gościom, którzy przyszli z kwiatami, od razu podajemy wazon z wodą.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>6. Dosprzedaż (upselling) — przykłady</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>Dwa sposoby na dosprzedaż: (1) polecenie droższego lub dodatkowego dania/napoju, np. foccacia do sałatki, kawa do deseru; (2) zaproponowanie droższej wersji zamawianej rzeczy, np. podwójne espresso zamiast pojedynczego, woda Cisowianka 700 ml zamiast 330 ml, latte zamiast cappuccino.</p>
+                        <p><strong>Przykłady:</strong><br>
+                        Gość: „Poproszę sałatkę Terra e Mare." → Kelner: „Oczywiście, proponuję do sałatki dodatkowo domówić pieczywo czosnkowe, foccacię."<br>
+                        Gość: „Poproszę deser tiramisu." → Kelner: „Do deseru proponuję kawę z palarni Etno."<br>
+                        Gość: „Poproszę espresso." → Kelner: „Oczywiście, espresso podwójne czy pojedyncze?"</p>
+                        <p>Zawsze pytamy o napój przy przyjmowaniu zamówienia i na końcu powtarzamy całe zamówienie, by wyeliminować pomyłki.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>7. Standardy czasu wydania napojów i przystawek</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p><strong>Napoje</strong> (pon–czw / pt–nd): napoje zimne w butelkach 3/5 min • piwo lane 5/7 min • herbata gorąca zwykła 5/7 min • lemoniada 5/7 min • wino lane 5/7 min • sok świeżo wyciskany 7/9 min • napoje gorące sezonowe (herbata rozgrzewająca, grzaniec) 7/9 min • kawa 7/9 min • drink 10/12 min.</p>
+                        <p><strong>Przystawki</strong> (pon–czw / pt–nd): oliwki 7/9 min • foccacia 10/15 min • włoska deska 15/15 min • krem z pomidorów 5/10 min • carpaccio 7/9 min • burrata e pomodorini 10/15 min.</p>
+                        <p>Przystawki zawsze podajemy po napojach. Przy sokach czy herbatach rozgrzewających (9 min) upewnij się, że przystawki nie trafią do stolika przed napojami.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>8. Zapisywanie zamówienia, wydawanie dań i pożegnanie gości</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p><strong>Bonowanie:</strong> przystawki bonujemy osobno, jako pierwsze; oznaczamy opcję „na start" (lub dopisujemy ten komentarz do dań bez tej opcji) oraz „teraz"/„potem"; dania, które nie powinny trafić na stół razem (np. pizza na wynos po deserze), bonujemy osobno. Natychmiast po przyjęciu zamówienia wpisujemy je do systemu POS — czas oczekiwania gości na pizzę liczy się od momentu odejścia kelnera od stolika.</p>
+                        <p><strong>Wydawanie:</strong> napoje wydajemy od dzieci, potem panie, na końcu panowie; komplet talerzyków i sztućców wydajemy razem z napojami; na wierzchu stosu talerzyków kładziemy serwetkę z logo, dokładamy koszyczek z serwetkami (tyle, ile osób, nie mniej) i wizytówkę z imieniem kelnera; oliwy smakowe i sól podajemy na życzenie gości.</p>
+                        <p><strong>Co zabieramy po zjedzeniu:</strong> puste naczynia, małe talerzyki, serwetki, koszyczek, oliwy/sól, puste butelki i szklanki (zostawiamy jedną, jeśli goście właśnie skończyli kawę/deser, by się nie czuli wyganiani).</p>
+                        <p><strong>Pożegnanie:</strong> pytamy, czy podać coś jeszcze, przy rachunku pytamy o ogólne wrażenia i wysłuchujemy uwag, żegnamy się np. „Do widzenia", „Do zobaczenia", „Miłego dnia/wieczoru", „Zapraszamy ponownie". Kelner zajmuje się gośćmi do samego końca — nie odczuwają, że skoro zjedli i zapłacili, przestali być dla niego ważni.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>9. Dress code</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p><strong>Standardowy ubiór kelnera:</strong> koszula w kratę (rękawy mogą być podwinięte), czarny fartuch z logiem i aniołem, czarne spodnie, czarne buty.</p>
+                        <p><strong>Koszula:</strong> tkanina popelinowa, klasyczny krój, delikatnie wcięta w talii, jednolity kolor mankietów i wewnętrznej strony listwy kołnierza, zaokrąglony dół.</p>
+                        <p><strong>Fartuch:</strong> czarny, zakładany na szyję, pasek regulowany na zatrzaski, krój w kształt trapezu, haft anioła z boku (wysokość 40 cm), haft logo na klatce piersiowej w kolorze białym. Możliwa dodatkowa kieszeń po prawej stronie.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>10. Praca w grupie i na rewirze</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>Zbierając naczynia ze stolika, wstępnie je segregujemy (szklanki/butelki, małe talerzyki, duże talerzyki, sztućce osobno) — ułatwia to pracę osobie na zmywaku. Dużą ilość napojów lub deserów, która nie mieści się na jednej tacy, dzielimy między dwie osoby, by wszyscy goście dostali swoje jednocześnie. Upuszczony przez kolegę sztuciec lub serwetkę od razu podnosimy i zanosimy do zmywu; jeśli kolega stłukł szkło, a mamy wolną chwilę, pomagamy posprzątać.</p>
+                        <p><strong>Rewiry:</strong> kelnerzy są przypisywani do rewirów zależnie od umiejętności i doświadczenia — im więcej doświadczenia, tym więcej stolików. <strong>Rewiry są osobne, ale goście są wspólni</strong> — jeśli goście z innego rewiru o coś proszą, spełniamy prośbę albo przekazujemy przypisanemu im kelnerowi. Nie opuszczamy rewiru bez poinformowania współpracownika lub przełożonego.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>11. Pizza z mąki bezglutenowej — serwis i FAQ</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>Pizza z mąki bezglutenowej posiada śladowe ilości glutenu (obecność produktów pszennych w restauracji) i NIE jest produktem w 100% bezglutenowym — nie rekomendujemy jej osobom z celiakią, odsyłamy do konsultacji z lekarzem.</p>
+                        <p><strong>Różnice:</strong> mniejsza średnica (ok. 30 cm), mniejsze i bardziej płaskie ranty, ilość składników zmniejszona o ok. 10%, wbita dedykowana chorągiewka z logiem anioła. Pizzaiolo musi wyraźnie wskazać obsłudze, która pizza jest bezglutenowa, a kelner musi mieć pewność, która to pizza, i wyraźnie zakomunikować to gościom przy podaniu.</p>
+                        <p><strong>FAQ:</strong> ciasto wyrabiane jest ze specjalnej mieszanki mąk bezglutenowych (kukurydziana, ryżowa, jaglana, białko grochu) — bez nabiału, ale ze śladem miodu w cieście, więc nie jest w pełni wegańskie. Obecnie nie mamy makaronów bezglutenowych. Dopłata za ciasto wynika z wyższej ceny mieszanki mąk bezglutenowych i większego nakładu pracy przy jej przygotowaniu.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>12. Pizza Gourmet — FAQ dla gości</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>Pizza Gourmet to nurt fine dining w Tutti Santi — autorskie receptury Mistrza Valerio Valle, składniki regionalne i certyfikowane najwyższej jakości. Średnica 22 cm, krojona na 6 kawałków, podawana z sosami w miseczkach na środku talerza lub z octem balsamicznym.</p>
+                        <p>Nie modyfikujemy jej składu (zaburzyłoby to dobraną kompozycję smakową) i nie sprzedajemy jej na wynos — forma podania to część doświadczenia. Część składników dodawana jest po wypieczeniu, celowo w temperaturze pokojowej, by nie utraciły siły smaku.</p>
+                        <p>Przygotowanie zajmuje ok. 15–20 minut; zamówiona razem z innymi daniami jest wydawana jednocześnie z nimi. Przy kilku pizzach Gourmet w formie degustacyjnej wydajemy je w odstępach 6–8 minut. Po każdym zabonowaniu pizzy Gourmet w POS kelner informuje pizzaiolo o zamówieniu i szczegółach realizacji.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>13. Rekomendacje pizzy dla grup gości</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>Kelner-doradca poleca opisowo, wskazując unikalny składnik, sposób przygotowania lub pochodzenie przepisu — nie tylko nazwę z karty.</p>
+                        <p><strong>Dla dzieci:</strong> Margherita, Prosciutto, Prosciutto e funghi, Salame Dolce Italy.<br>
+                        <strong>Wegetariańskie/wegańskie:</strong> Spinaci e Ricotta, Margherita con Bufala, Quattro formaggi, Margherita, Verdure Miste, Funghi Misti, Carciofi e Bufala.<br>
+                        <strong>Dla pań:</strong> Santa Rita, San Marco, Parma, Rukola, Margherita con Bufala.<br>
+                        <strong>Dla panów:</strong> San Antonio, Abruzja, Pancetta e Salame, Prosciutto e Salame, San Luca, Sant'Andrea, Quattro formaggi plus.<br>
+                        <strong>Pikantne:</strong> Quattro formaggi plus, San Antonio, Sant'Andrea, San Luca, Salame Picante, Pancetta e Salame, San Sebastiano.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>14. Kolejka, powitanie i postawa kelnera</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p><strong>Kolejka:</strong> przy dużym obłożeniu (weekendy, święta) wyznaczamy osobę na hosta — wprowadza gości na salę i kontroluje kolejkę. Informujemy uczciwie, że sala jest zajęta i trzeba poczekać, pilnujemy kto stał za kim (rejestr imię + liczba osób), proponujemy przejrzenie menu w oczekiwaniu, nie zniechęcamy gości do czekania. Para może ustąpić miejsca większej grupie, jeśli sama zwolni stolik czteroosobowy — informujemy ją wtedy, że zaraz dostanie swój stolik.</p>
+                        <p><strong>Powitanie:</strong> Dzień dobry + pytanie o liczbę osób, prowadzimy do stolika (ostateczny wybór stolika należy do gościa, możemy zaproponować inny, jeśli obecny im nie odpowiada). Karty podajemy z uśmiechem, w ciągu max 2 minut, utrzymując kontakt wzrokowy, wskazujemy miejsce na płaszcze.</p>
+                        <p><strong>Postawa i mowa ciała:</strong> ruchy płynne i energiczne (wrażenie kompetencji), pogodny wyraz twarzy przy każdym kontakcie z gościem, gesty skromne i eleganckie (nie przesadzone, nie zamknięte), stały, dyskretny kontakt wzrokowy (regularnie sprawdzamy, czy gościom niczego nie brakuje), głos dopasowany do sytuacji — buduje nastrój, może uspokoić lub zdenerwować w zależności od tonu.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>15. Kawa — różnice między rodzajami</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p><strong>Americano:</strong> espresso połączone z wodą oraz ciepłym mlekiem.<br>
+                        <strong>Cappuccino:</strong> espresso oraz krem mleczny.<br>
+                        <strong>Latte:</strong> podwójne espresso oraz krem mleczny — więcej kawy, smak w odczuciu delikatniejszy niż cappuccino. Przy niezdecydowaniu gościa polecamy latte.</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>16. Włoskie nazwy pizz — słownik wymowy</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>Nazwy niektórych pizz pochodzą od głównych składników:</p>
+                        <p>• <strong>Prosciutto e Salame</strong> [prosziuto e salame] — szynka i salami.<br>
+                        • <strong>Prosciutto e Funghi</strong> [prosziuto e fungi] — szynka i grzyby.<br>
+                        • <strong>Salame Picante</strong> [salame pikante] — salami pikantne, ostrość od papryczki peperoncino.<br>
+                        • <strong>Salame Dolce Italy</strong> [salame dolcze itali] — łagodne, oryginalne włoskie salami.<br>
+                        • <strong>Rucola</strong> [rukola] — sałata z basenu Morza Śródziemnego, podawana zawsze świeża po wypieczeniu.<br>
+                        • <strong>Pancetta</strong> [panczetta] — boczek.<br>
+                        • <strong>Capricciosa</strong> [kapriczioza] — od słowa „kaprys"; szynka gotowana, karczochy, oliwki.<br>
+                        • <strong>Quattro Stagioni</strong> [kłatro stadżioni] — cztery pory roku; cztery ćwiartki, w każdej inny składnik (szynka, pieczarki, karczochy, salami Milano).<br>
+                        • <strong>Quattro formaggi</strong> [kłatro formadżi] — cztery sery: mozzarella, gorgonzola, pecorino romano, grana padano.<br>
+                        • <strong>Calzone Valerio</strong> — pizza zamykana do środka.</p>
+                        <p>Część pizz nazwana jest od imion świętych, np. <strong>Santa Rita</strong> (św. Rita), <strong>San Antonio</strong> (św. Antoni).</p>
+                    </div>
+                </div>
+
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>17. Pizza włoska klasyczna — ciasto i przygotowanie</span><span>▼</span></div>
+                    <div class="manual-content">
+                        <p>Ciasto wytwarzane jest z włoskiej mąki 5 Stagioni typ 00 (z najlepszej jakości miękkiej pszenicy, młyn o 200-letniej tradycji). Dokładne proporcje mąki, wody, soli, oliwy i drożdży znają tylko nasi pizzaiolo. Ciasto dojrzewa dłużej niż w pizzach standardowych, dzięki czemu ranty są bardziej puszyste, a jednocześnie odpowiednio chrupiące.</p>
+                        <p>Pizza klasyczna: ciasto cienkie (grubość ok. 3 mm), placki wykręcane ręcznie do średnicy 32 cm z użyciem mąki semolina (zapobiega przyklejaniu się do blatu). Wypiekana w piecach Valoriani opalanych drewnem, w temperaturze ok. 350°C przez ok. 3 minuty. Krojona na 8 trójkątów. Dodatki podawane do pizzy: oliwa extra virgin i ocet balsamiczny.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-audyt" class="screen">
+                <button class="back-btn" onclick="switchScreen('screen-home')">← Powrót do menu</button>
+                <div class="section-title">🎯 Audyt — pytania i odpowiedzi</div>
+                <p style="font-size:12px; color:#999; margin-bottom:12px;">To pytania, jakie zadaje audytor. Każdy pracownik powinien znać te odpowiedzi na pamięć.</p>
+                <div id="audyt-list"></div>
+            </div>
+
+            <div id="screen-test" class="screen">
+                <button class="back-btn" onclick="switchScreen('screen-home')">← Powrót do menu</button>
+                <div class="section-title">📝 Test wiedzy</div>
+                <select id="quiz-category" style="width:100%; margin-bottom:10px; background:#222; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; font-size:13px;" onchange="startQuiz()">
+                    <option value="all">Wszystkie kategorie</option>
+                    <option value="audyt">🎯 Audyt</option>
+                    <option value="wino">🍷 Wino</option>
+                    <option value="zasady">📜 Zasady restauracji</option>
+                    <option value="wiedza">📖 Baza wiedzy</option>
+                    <option value="menu">🍕 Menu</option>
+                </select>
+                <div class="chat-status" id="quiz-stats">Przerobione: 0 • Dobrze: 0</div>
+                <div class="task-item" style="min-height:60px;">
+                    <div class="task-title" id="quiz-question">Wybierz kategorię i zacznij test.</div>
+                </div>
+                <div id="quiz-choices" style="display:flex; flex-direction:column; gap:8px; margin-top:12px;"></div>
+                <div id="quiz-next-wrap" style="display:none; margin-top:12px;">
+                    <button class="auth-btn primary" style="margin-bottom:0;" onclick="nextQuizQuestion()">Następne pytanie →</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-bar">
+            <div class="nav-item active" onclick="switchScreen('screen-home')">🏠</div>
+            <div class="nav-item" onclick="switchScreen('screen-menu')">🍕</div>
+            <div class="nav-item" onclick="switchScreen('screen-wina')">🍷</div>
+            <div class="nav-item" onclick="switchScreen('screen-baza')">📖</div>
+            <div class="nav-item" onclick="switchScreen('screen-test')">📝</div>
+        </div>
+    </div>
+
+    <script>
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            if (screenId === 'screen-test' && !quizPool.length) startQuiz();
+        }
+
+        function toggleAccordion(header) {
+            header.parentElement.classList.toggle('open');
+        }
+
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.innerText = str == null ? '' : String(str);
+            return d.innerHTML;
+        }
+
+        const menuRows = [
+["Nowości","Pizza Fresca Campagna","sos Crème Fraiche, Mozzarella di Bufala, krótko marynowane ogórek, rzodkiewka, szalotka, oliwa z sycylijskich oliwek, żółtko, koperek, czarny pieprz"],
+["Nowości","Przystawka Caprese di Bufala","pomidory daktylowe i rzymskie, dressing miodowo-musztardowy, Mozzarella di Bufala, bazylia, szpinak, orzeszki pini"],
+["Nowości","Insalata di Burrata e Verdure","Burrata, roszponka, szpinak, pesto pietruszkowe, koper włoski, zielone jabłko, groszek cukrowy, rzodkiewka, mięta, bazylia"],
+["Nowości","Ravioli di Burrata","pierożki nadziewane Burratą, emulsja z sycylijskiej oliwy, Parmigiano Reggiano, masło, szałwia, sok i skórka z cytryny"],
+["Nowości","Selekcja oliw PREMIUM","3 oliwy extra vergine: Chiaramonte Gulfi, Tradizione, De Coppini; podawane z pieczywem własnego wypieku i chrupiącym jabłkiem"],
+["Przystawki","Krem z pomidorów","bulion warzywny, świeży tymianek, włoski ser Pecorino Romano"],
+["Przystawki","Burrata e Pomodorini","włoski ser Burrata, pomidorki koktajlowe konfitowane z oliwą, miodem, czosnkiem i tymiankiem, pesto bazyliowe, puder z czarnych oliwek, cytryna, focaccia"],
+["Przystawki","Tartare di Tonno","tatar z tuńczyka Yellowfin, cytryna, oliwa Chiaramonte Gulfi, pistacje, cukinia, mięta, sól w płatkach, czarny pieprz, Focaccia Superiore"],
+["Przystawki","Tatar wołowy z kremem z Gorgonzoli i nutą Primitivo","udziec wołowy w marynacie Colatura di Alici, krem z Gorgonzoli, szalotka konfitowana z tymiankiem, chipsy ziemniaczane, piklowana gorczyca, redukcja Primitivo, infuzja dymem"],
+["Przystawki","Gamberetti con Burro","krewetki argentyńskie, czosnek, peperoncino, masło, pietruszka, cytryna, focaccia z rozmarynem"],
+["Przystawki","Selekcja włoskich wędlin i serów","podwędzany Speck, Salami Milano, dojrzewająca szynka Prosciutto Crudo, Salami Picante, ser Provolone Picante, opalany ser owczy Pecorino Romano, focaccia, oliwki, mostarda pigwowa"],
+["Przystawki","Selekcja włoskich wędlin i serów PREMIUM","pieczona Porchetta di Ariccia, wędlina wołowa Bresaola, szynka Prosciutto di San Daniele, salami Ventricina Piccante, ser Parmigiano Reggiano, oliwki, mostarda, karmelizowane jabłko, kasztany w miodzie, Grissini, orzechy włoskie"],
+["Przystawki","Focaccia Classica z oliwą czosnkową","włoskie pieczywo z oliwą czosnkową"],
+["Przystawki","Focaccia Superiore","ciepłe pieczywo na naturalnym zaczynie biga, z rozmarynem"],
+["Przystawki","Olive della casa","oliwki w marynacie"],
+["Przystawki","Insalata Mista (dodatek do pizzy)","pomidorki koktajlowe, pesto z pietruszki, miks sałat, rukola, szpinak, roszponka, Grana Padano, bazylia"],
+["Sałatki","Insalata di Carpaccio","miks sałat, sos winegret, dojrzewająca wędlina wołowa Bresaola, świeża rukola, Grana Padano, świeżo mielony pieprz"],
+["Sałatki","Insalata Pesca con Carne","plastry wędzonej piersi z kaczki, brzoskwinia, kozi ser, świeża rukola, roszponka, sos musztardowy z mango, puder z orzechów laskowych"],
+["Sałatki","Insalata Verdure e Gamberi","krewetki marynowane w oliwie czosnkowej, liście szpinaku, ser feta, pesto z pietruszki, cebulki w zalewie, karmelizowane pomidorki, kiełki"],
+["Sałatki","Insalata Terra e Mare","miks sałat, pomarańcza, łosoś wędzony na zimno, Mozzarella di Bufala, sos imbirowo-musztardowy z mango, liście mięty, szczypiorek, czarny sezam"],
+["Sałatki","Insalata Verdure Grigliate","miks sałat z miętą, grillowane warzywa (cukinia, papryka, szalotka), Mozzarella di Bufala, oliwki marynowane, Pecorino Romano, ocet balsamiczny Giuseppe Cremonini"],
+["Makarony i desery","Lasagna della Mamma","sos z włoskich pomidorów, mielone mięso wieprzowe, makaron lasagne, czosnek, Mozzarella, sos beszamelowy, Grana Padano, bazylia"],
+["Makarony i desery","Pesto Verde","makaron spaghettoni, pesto pietruszkowe, Grana Padano, orzeszki pinii, oliwa chili"],
+["Makarony i desery","Amatriciana","makaron spaghettoni, pomidory, włoska wędlina Guanciale, Pecorino Romano, peperoncino"],
+["Makarony i desery","Ravioli di Burrata","pierożki nadziewane Burratą, emulsja z sycylijskiej oliwy, Parmigiano Reggiano, masło, szałwia, cytryna"],
+["Makarony i desery","Spaghetti Rossi","makaron spaghettoni, pikantna kiełbasa Nduja, prażona Pancetta, pomidory, Stracciatella, cebula karmelizowana z octem balsamicznym i miodem, groszek cukrowy"],
+["Makarony i desery","Pomodorini e Gamberetti","makaron tagliatelle, pomidorki koktajlowe, krewetki, białe wino, sos maślany, Grana Padano, natka pietruszki, czosnek"],
+["Makarony i desery","Tagliatelle con Ragù Bolognese","tagliatelle, karkówka wołowa, łopatka wieprzowa, Pancetta i Guanciale, Sofrito, wino Primitivo, mleko, bulion wołowy, pomidory, śmietana chrzanowa, Grana Padano"],
+["Makarony i desery","Parma e Tartufa","tagliatelle, szynka Prosciutto Crudo, białe wino, cebula, czosnek, sos śmietanowy z kremem z trufli, Grana Padano, rukola"],
+["Makarony i desery","Gnocchi al Burro","kluseczki ziemniaczane, masło, czosnek, Grana Padano (polecane dla dzieci)"],
+["Makarony i desery","Spaghetti con Pomodoro","makaron spaghetti, włoskie pomidory, Grana Padano, oliwa extra vergine (polecane dla dzieci)"],
+["Makarony i desery","Domowa Panna Cotta","wanilia, mus malinowy"],
+["Makarony i desery","Sernik z Ricottą i Grana Padano","sos z marakui, orzechy, orzechowo-czekoladowy krem Nocciolata Bio"],
+["Makarony i desery","Crostata con Panna e Frutti","masa ciasteczkowa z kremu migdałowego, masła i herbatników, jabłka i śliwki duszone w winie Marsala i rozmarynie, crème pâtissière, kruszonka migdałowa, liofilizowane maliny"],
+["Pizza klasyczna","Margherita","sos pomidorowy, ser Mozzarella, świeża bazylia"],
+["Pizza klasyczna","Hawai","sos pomidorowy, ser Mozzarella, ananas, szynka Prosciutto Cotto"],
+["Pizza klasyczna","Salame Picante","sos pomidorowy, ser Mozzarella, włoskie Salami Picante (pikantne)"],
+["Pizza klasyczna","Salame Dolce Italy","sos pomidorowy, ser Mozzarella, włoskie Salami Milano"],
+["Pizza klasyczna","Prosciutto","sos pomidorowy, ser Mozzarella, szynka Prosciutto Cotto"],
+["Pizza klasyczna","Prosciutto e Funghi","sos pomidorowy, ser Mozzarella, pieczarki, szynka Prosciutto Cotto"],
+["Pizza klasyczna","Prosciutto e Salame","sos pomidorowy, ser Mozzarella, pieczarki, szynka Prosciutto Cotto, włoskie Salami Milano"],
+["Pizza klasyczna","Pancetta e Salame","sos pomidorowy, ser Mozzarella, pieczarki, włoski boczek Pancetta, Salami Picante, Gorgonzola"],
+["Pizza klasyczna","Quattro Formaggi","sos pomidorowy, ser Mozzarella, Gorgonzola, Grana Padano, Pecorino Romano"],
+["Pizza klasyczna","Quattro Stagioni","cztery ćwiartki: szynka Prosciutto Cotto, pieczarki, karczochy, Salami Milano, sos pomidorowy, Mozzarella"],
+["Pizza klasyczna","Capricciosa","sos pomidorowy, ser Mozzarella, pieczarki, karczochy, szynka Prosciutto Cotto, czarne oliwki"],
+["Pizza klasyczna","Calzone Valerio","pizza zamykana do środka; sos pomidorowy, Mozzarella, szynka Prosciutto Cotto, pieczarki, rukola"],
+["Pizza premium","Abruzja","sos z włoskich pomidorów, Mozzarella di Bufala, boczek Pancetta, cebula, Pecorino Romano"],
+["Pizza premium","Rukola","sos pomidorowy, ser Mozzarella, pieczarki, szynka Prosciutto Crudo, świeża rukola"],
+["Pizza premium","San Antonio","sos pomidorowy, ser Mozzarella, dojrzewający ser pleśniowy Gorgonzola, włoskie Salami Picante, ser Grana Padano, świeża rukola (pikantne)"],
+["Pizza premium","Santa Clara","sos pomidorowy, szynka Prosciutto Crudo, pomidory koktajlowe, rukola, ser Burrata, krem balsamiczny"],
+["Pizza premium","Spinaci e Ricotta","sos pomidorowy, ser Mozzarella, liście szpinaku, karmelizowane pomidorki, ser Ricotta, czarne oliwki, tymianek (bez mięsa)"],
+["Pizza premium","Parma","sos pomidorowy, ser Mozzarella, pieczarki, Mozzarella di Bufala, szynka Prosciutto Crudo, czarne oliwki"],
+["Pizza premium","Quattro Formaggi Plus","sos pomidorowy, ser Mozzarella, Salami Picante, Gorgonzola, Pecorino Romano, Grana Padano (pikantne)"],
+["Pizza premium","San Giorgio","sos pomidorowy, krewetki z czosnkiem i pietruszką, Mozzarella di Bufala, boczek Pancetta, pomidorki karmelizowane, natka pietruszki"],
+["Pizza premium","Sant'Andrea","sos pomidorowy, ser Mozzarella, krewetki w oliwie pikantnej, świeże liście szpinaku, Salami Picante, ser Ricotta, cytryna, tymianek (pikantne)"],
+["Pizza premium","San Sebastiano","sos pomidorowy, ser Mozzarella, wędzona szynka Speck, ser Provolone Picante, cebula, pikantna papryczka, tymianek (pikantne)"],
+["Pizza premium","Pancetta","sos pomidorowy, ser Mozzarella, pieczarki, szynka Prosciutto Cotto, boczek Pancetta"],
+["Pizza premium","Margherita con Bufala","sos z włoskich pomidorów, włoski ser Mozzarella di Bufala, świeża bazylia (bez mięsa)"],
+["Pizza premium bianca","San Marco","sos śmietanowy z Grana Padano i czosnkiem, miks grzybów leśnych, Mozzarella di Bufala, szynka Prosciutto Crudo, świeży szczypiorek"],
+["Pizza premium bianca","Santa Rita","pomidory zapieczone z oliwą czosnkową i Grana Padano, szynka Prosciutto Crudo, Mozzarella di Bufala, pomidorki koktajlowe, świeża bazylia"],
+["Pizza premium bianca","Spinaci e Ventricina","sos śmietanowy z Grana Padano i czosnkiem, szpinak zapieczony i świeży, ser Mozzarella, salami Ventricina Piccante, Mozzarella di Bufala, chips Grana Padano (pikantne)"],
+["Pizza premium bianca","San Luca","sos śmietanowy z Grana Padano i czosnkiem, miks grzybów leśnych, Mozzarella di Bufala, włoskie Salami Picante, szczypiorek (pikantne)"],
+["Pizza premium bianca","San Giovanni","ser Mozzarella, pieczarki, szynka Prosciutto Cotto, krem truflowy, świeża rukola, Pecorino Romano"],
+["Pizza premium bianca","Tartufo","ser Mozzarella, pieczarki, szynka Prosciutto Cotto, Mozzarella di Bufala, krem truflowy"],
+["Pizza premium bianca","San Pietro","ser Mozzarella, ser Stracchino, karmelizowane pomidorki koktajlowe, pesto z pietruszki, rukola (bez mięsa)"],
+["Pizza premium bianca","Carciofi e Bufala","Mozzarella di Bufala, karczochy, świeży szpinak, oliwa czosnkowa, orzechy włoskie, pesto z pietruszki, pomidory suszone, rukola, koperek (bez mięsa)"],
+["Pizza Gourmet","San Lorenzo","udziec wołowy w marynacie Colatura di Alici, sos Mascarpone, Stracciatella, popcorn z kaparów, prażona czerwona cebula, emulsja Parmigiano Reggiano, oliwa extra vergine, cytryna"],
+["Pizza Gourmet","Santa Caterina","szynka Prosciutto di San Daniele dojrzewająca 24 miesiące, karczochy smażone z szałwią i cytryną, śmietanka, emulsja Parmigiano Reggiano, chips z liści szałwii, puder z oliwek"],
+["Pizza Gourmet","Santa Lucia","Crème Fraiche, Mozzarella di Bufala, Porchetta di Ariccia, Stracciatella, sos pistacjowy, pieprz czerwony, pistacje z Sycylii, autorskie pesto pietruszkowe"],
+["Pizza Gourmet","Santa Rosalia","szynka Prosciutto di San Daniele dojrzewająca 24 miesiące, pomidory z oliwą czosnkową i Grana Padano, Stracciatella, pomidory karmelizowane, krystalizowana bazylia, autorskie pesto pietruszkowe"]
+        ].map(r => ({ cat: r[0], name: r[1], desc: r[2] }));
+
+        const slownikTerms = [
+            { term: "Prosciutto Crudo", def: "dojrzewająca, surowa szynka wieprzowa (tzw. szynka parmeńska) — suszona na powietrzu, niegotowana." },
+            { term: "Prosciutto Cotto", def: "szynka gotowana." },
+            { term: "Pancetta", def: "włoski boczek dojrzewający." },
+            { term: "Speck", def: "wędzona i dojrzewająca szynka wieprzowa." },
+            { term: "Guanciale", def: "dojrzewający policzek wieprzowy." },
+            { term: "Bresaola", def: "suszona, dojrzewająca polędwica wołowa." },
+            { term: "Salami Picante", def: "pikantne włoskie salami." },
+            { term: "Salami Milano", def: "łagodne, delikatne włoskie salami." },
+            { term: "Nduja", def: "pikantna, smarowna kiełbasa kalabryjska." },
+            { term: "Porchetta", def: "pieczona, faszerowana ziołami wieprzowina." },
+            { term: "Stracciatella", def: "kremowy, „poszarpany” serek będący wnętrzem Burraty." },
+            { term: "Burrata", def: "świeży ser z Mozzarelli z kremowym nadzieniem Stracciatelli." },
+            { term: "Mozzarella di Bufala", def: "mozzarella wyrabiana z mleka bawolego (czarnych bawolic)." },
+            { term: "Grana Padano", def: "twardy, dojrzewający ser krowi." },
+            { term: "Pecorino Romano", def: "twardy, słony ser owczy." },
+            { term: "Gorgonzola", def: "dojrzewający ser pleśniowy krowi." },
+            { term: "Provolone", def: "półtwardy, wędzony ser włoski." },
+            { term: "Ricotta", def: "delikatny, twarogopodobny serek serwatkowy." }
+        ];
+
+        const audytQA = [
+            { q: "Gość-audytor prosi o polecenie pizzy — co robisz?", a: "Aktywnie polecasz pizzę, wykazujesz się znajomością składników i dobierasz propozycję do gustu pytającego." },
+            { q: "Dlaczego pizza w Tutti Santi jest lekkostrawna?", a: "Bo nasze ciasto dojrzewa minimum 48 godzin." },
+            { q: "Dlaczego nie mogę skomponować własnej pizzy?", a: "Mamy bardzo szeroki wybór pizz w karcie — na pewno znajdzie się coś odpowiedniego, ewentualnie można coś dodać lub odjąć." },
+            { q: "Czy są dostępne dania bezglutenowe?", a: "Nie ma dań w 100% bezglutenowych, ale mamy ciasto z mąki bezglutenowej — jesteśmy jednak pizzerią, więc śladowe ilości glutenu mogą się pojawić." },
+            { q: "Jaka kawa jest w ofercie restauracji?", a: "Lavazza Tierra Selection — ziarna z Ameryki Południowej: Nikaragua, Peru, Brazylia." },
+            { q: "Jakie alergeny znajdują się w pizzy San Sebastiano?", a: "Kod QR znajduje się na ostatniej stronie menu — można zeskanować i sprawdzić, albo zapytać obsługi." },
+            { q: "Poproszono Cię o polecenie asortymentu z kredensu — co robisz?", a: "Trzeba coś konkretnego polecić, np. oliwę, mąkę, karczochy — cokolwiek z wystawki na kredensie." },
+            { q: "Jak przygotować się na pytania o aktualne nowości?", a: "Trzeba znać nowości, które mamy w danym sezonie — sprawdzać kartę i ogłoszenia na bieżąco." },
+            { q: "Czy semolina to inaczej mówiąc kasza manna?", a: "Nie." },
+            { q: "Czy w Tutti Santi jest serwowana pizza neapolitańska?", a: "Nie." },
+            { q: "Czy dania makaronowe powinny być wydawane na ciepłych talerzach?", a: "Tak." },
+            { q: "Czy stojak pod pizzę Gourmet dostarczamy niezwłocznie po przyjęciu zamówienia?", a: "Tak." },
+            { q: "Czy standardem jest wydawanie pizz do 35 minut?", a: "Nie." }
+        ];
+
+        function renderMenu() {
+            const box = document.getElementById('menu-list');
+            if (!box) return;
+            const cats = [...new Set(menuRows.map(m => m.cat))];
+            box.innerHTML = cats.map(cat => `
+                <div class="wine-section-title">${escapeHtml(cat)}</div>
+                ${menuRows.filter(m => m.cat === cat).map(m => `
+                    <div class="wine-card">
+                        <div class="wine-name">${escapeHtml(m.name)}</div>
+                        <div class="wine-details">${escapeHtml(m.desc)}</div>
+                    </div>
+                `).join('')}
+            `).join('') + `
+                <div class="wine-section-title">Słownik składników</div>
+                ${slownikTerms.map(t => `
+                    <div class="wine-card">
+                        <div class="wine-name">${escapeHtml(t.term)}</div>
+                        <div class="wine-details">${escapeHtml(t.def)}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        renderMenu();
+
+        function renderAudytList() {
+            const box = document.getElementById('audyt-list');
+            if (!box) return;
+            box.innerHTML = audytQA.map((item, i) => `
+                <div class="manual-category">
+                    <div class="manual-header" onclick="toggleAccordion(this)"><span>${i + 1}. ${escapeHtml(item.q)}</span><span>▼</span></div>
+                    <div class="manual-content"><p>${escapeHtml(item.a)}</p></div>
+                </div>
+            `).join('');
+        }
+        renderAudytList();
+
+        function buildSearchIndex() {
+            const idx = [];
+            document.querySelectorAll('.rules-accordion, .manual-category').forEach(el => {
+                const screen = el.closest('.screen');
+                if (!screen) return;
+                const headerSpan = el.querySelector('.rules-header span, .manual-header span');
+                const content = el.querySelector('.rules-content, .manual-content');
+                if (headerSpan && content) {
+                    idx.push({ title: headerSpan.textContent.trim(), text: content.textContent.trim(), screen: screen.id, el });
+                }
+            });
+            document.querySelectorAll('.wine-card').forEach(el => {
+                const name = el.querySelector('.wine-name');
+                const details = el.querySelector('.wine-details');
+                if (name) idx.push({ title: name.textContent.trim(), text: details ? details.textContent.trim() : '', screen: el.closest('.screen').id, el });
+            });
+            return idx;
+        }
+        const searchIndex = buildSearchIndex();
+        let lastSearchResults = [];
+
+        function runSearch() {
+            const q = document.getElementById('home-search').value.trim().toLowerCase();
+            const box = document.getElementById('search-results');
+            if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+            lastSearchResults = searchIndex.filter(item =>
+                item.title.toLowerCase().includes(q) || item.text.toLowerCase().includes(q)
+            ).slice(0, 8);
+            box.style.display = 'block';
+            box.innerHTML = lastSearchResults.length
+                ? lastSearchResults.map((r, i) => `
+                    <div class="search-result" onclick="goToSearchResult(${i})">
+                        <div class="task-title">${escapeHtml(r.title)}</div>
+                        <div style="font-size:11px; color:#999;">${escapeHtml(r.text.slice(0, 90))}${r.text.length > 90 ? '…' : ''}</div>
+                    </div>
+                `).join('')
+                : '<div style="font-size:12px; color:#888;">Brak wyników.</div>';
+        }
+        document.getElementById('home-search').addEventListener('input', runSearch);
+
+        function goToSearchResult(i) {
+            const r = lastSearchResults[i];
+            if (!r) return;
+            switchScreen(r.screen);
+            if (r.el.classList.contains('rules-accordion') || r.el.classList.contains('manual-category')) {
+                r.el.classList.add('open');
+            }
+            document.getElementById('home-search').value = '';
+            document.getElementById('search-results').style.display = 'none';
+            setTimeout(() => r.el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+        }
+
+        const quizBank = [...audytQA.map(x => ({ cat: 'audyt', q: x.q, a: x.a }))];
+        menuRows.forEach(m => {
+            quizBank.push({ cat: 'menu', q: `Jaki jest skład pizzy / dania „${m.name}”?`, a: m.desc });
+        });
+        slownikTerms.forEach(t => {
+            quizBank.push({ cat: 'menu', q: `Co to jest ${t.term}?`, a: t.def });
+        });
+        document.querySelectorAll('.rules-accordion, .manual-category').forEach(el => {
+            const screen = el.closest('.screen');
+            if (!screen || !['screen-zasady', 'screen-baza', 'screen-wina'].includes(screen.id)) return;
+            const headerSpan = el.querySelector('.rules-header span, .manual-header span');
+            const content = el.querySelector('.rules-content, .manual-content');
+            if (!headerSpan || !content) return;
+            const cat = screen.id === 'screen-zasady' ? 'zasady' : (screen.id === 'screen-baza' ? 'wiedza' : 'wino');
+            quizBank.push({ cat, q: `Co wiesz o: „${headerSpan.textContent.trim()}”?`, a: content.textContent.trim().replace(/\s+/g, ' ') });
+        });
+        document.querySelectorAll('#screen-wina .wine-card').forEach(el => {
+            const name = el.querySelector('.wine-name');
+            const details = el.querySelector('.wine-details');
+            if (name && details) quizBank.push({ cat: 'wino', q: `Co wiesz o winie „${name.textContent.trim()}”?`, a: details.textContent.trim().replace(/\s+/g, ' ') });
+        });
+
+        let quizPool = [];
+        let quizIdx = 0;
+        let quizStats = { done: 0, know: 0 };
+
+        function shuffleArr(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function showQuizQuestion() {
+            const qEl = document.getElementById('quiz-question');
+            const choicesBox = document.getElementById('quiz-choices');
+            document.getElementById('quiz-next-wrap').style.display = 'none';
+            if (!quizPool.length) { qEl.textContent = 'Brak pytań w tej kategorii.'; choicesBox.innerHTML = ''; return; }
+            if (quizIdx >= quizPool.length) { quizPool = shuffleArr(quizPool); quizIdx = 0; }
+            const current = quizPool[quizIdx];
+            qEl.textContent = current.q;
+            renderQuizChoices(current);
+        }
+
+        function renderQuizChoices(current) {
+            const box = document.getElementById('quiz-choices');
+            const pool = quizBank.filter(x => x.a !== current.a);
+            const sameCat = pool.filter(x => x.cat === current.cat);
+            const source = sameCat.length >= 3 ? sameCat : pool;
+            const distractors = shuffleArr(source).slice(0, 3).map(x => x.a);
+            const options = shuffleArr([current.a, ...distractors]);
+            box.innerHTML = options.map(opt => `
+                <button class="auth-btn" style="margin-bottom:0; text-align:left; white-space:normal; line-height:1.4;" onclick="selectQuizAnswer(this, ${opt === current.a})">${escapeHtml(opt)}</button>
+            `).join('');
+        }
+
+        function selectQuizAnswer(btn, correct) {
+            const current = quizPool[quizIdx];
+            document.querySelectorAll('#quiz-choices button').forEach(b => {
+                b.disabled = true;
+                if (b.textContent.trim() === current.a.trim()) {
+                    b.style.background = '#1e5c33'; b.style.borderColor = '#1e5c33'; b.style.color = '#9be8ae';
+                } else if (b === btn && !correct) {
+                    b.style.background = '#442222'; b.style.borderColor = '#442222'; b.style.color = '#f3a';
+                }
+            });
+            quizStats.done++;
+            if (correct) quizStats.know++;
+            updateQuizStats();
+            document.getElementById('quiz-next-wrap').style.display = 'block';
+        }
+
+        function nextQuizQuestion() {
+            quizIdx++;
+            showQuizQuestion();
+        }
+
+        function startQuiz() {
+            const cat = document.getElementById('quiz-category').value;
+            quizPool = shuffleArr(cat === 'all' ? quizBank : quizBank.filter(q => q.cat === cat));
+            quizIdx = 0;
+            quizStats = { done: 0, know: 0 };
+            updateQuizStats();
+            showQuizQuestion();
+        }
+
+        function updateQuizStats() {
+            const el = document.getElementById('quiz-stats');
+            if (el) el.textContent = `Przerobione: ${quizStats.done} • Dobrze: ${quizStats.know}`;
+        }
+
+        function dayOfYear() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            return Math.floor((now - start) / 86400000);
+        }
+
+        function renderDaily() {
+            const titleEl = document.getElementById('daily-title');
+            const textEl = document.getElementById('daily-text');
+            if (!titleEl || !textEl) return;
+            const pool = quizBank.filter(q => q.cat === 'menu');
+            if (!pool.length) return;
+            const idx = dayOfYear() % pool.length;
+            const item = pool[idx];
+            titleEl.textContent = item.q;
+            textEl.textContent = item.a;
+        }
+
+        function showAnotherDaily() {
+            const titleEl = document.getElementById('daily-title');
+            const textEl = document.getElementById('daily-text');
+            const pool = quizBank.filter(q => q.cat === 'menu');
+            if (!pool.length) return;
+            const item = pool[Math.floor(Math.random() * pool.length)];
+            titleEl.textContent = item.q;
+            textEl.textContent = item.a;
+        }
+        renderDaily();
+    </script>
+</body>
+</html>
