@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Tutti Santi Gdańsk – Wiedza i standardy</title>
+    <title>Tutti Santi Gdańsk – Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -280,17 +282,79 @@
         .search-result .task-title { color: #d4ac0d; }
     
         .daily-card { min-height:80px; }
+        .sub-auth-box { display:none; flex-direction:column; gap:10px; text-align:left; background:#222; padding:16px; border-radius:14px; border:1px solid #333; width:100%; }
     </style>
 </head>
 <body>
     <div class="phone-frame">
+        <div id="auth-screen" class="auth-screen">
+            <div class="auth-logo">🍕</div>
+            <div class="auth-title">Tutti Santi Gdańsk</div>
+            <div class="auth-subtitle">Wybierz sposób logowania</div>
+            <div id="auth-main-buttons" style="width:100%;">
+                <button class="auth-btn primary" onclick="showLoginOptions('pracownik')">👤 Pracownik</button>
+                <button class="auth-btn" onclick="showLoginOptions('manager')">🔑 Manager</button>
+            </div>
+            <div id="auth-pracownik-box" class="sub-auth-box">
+                <label>Wybierz swój profil:</label>
+                <select id="select-auth-pracownik">
+                    <optgroup label="Kuchnia">
+                        <option value="Anton Lahir|Szef Kuchni|kuchnia">Anton Lahir (Szef Kuchni)</option>
+                        <option value="Kacper Szmagliński|Z-ca Szefa Kuchni|kuchnia">Kacper Szmagliński (Z-ca Szefa Kuchni)</option>
+                        <option value="Olaf Wójcik|Kucharz|kuchnia">Olaf Wójcik (Kucharz)</option>
+                        <option value="Nazar Yakivchuk|Kucharz|kuchnia">Nazar Yakivchuk (Kucharz)</option>
+                        <option value="Dmytro Yesypchuk|Kucharz|kuchnia">Dmytro Yesypchuk (Kucharz)</option>
+                        <option value="Hanna Vezdenko|Kucharz|kuchnia">Hanna Vezdenko (Kucharz)</option>
+                        <option value="Ilya Sodel|Kucharz|kuchnia">Ilya Sodel (Kucharz)</option>
+                    </optgroup>
+                    <optgroup label="Sala / Kelnerzy">
+                        <option value="Katarzyna Kysyluk|Kelner|sala">Katarzyna Kysyluk (Kelner)</option>
+                        <option value="Katarzyna Treder|Kelner|sala">Katarzyna Treder (Kelner)</option>
+                        <option value="Katarzyna Żeleźnik|Kelner|sala">Katarzyna Żeleźnik (Kelner)</option>
+                        <option value="Weronika Sawicka|Kelner|sala">Weronika Sawicka (Kelner)</option>
+                        <option value="Aleksandra Godlewska|Kelner|sala">Aleksandra Godlewska (Kelner)</option>
+                        <option value="Marita Formela|Kelner|sala">Marita Formela (Kelner)</option>
+                        <option value="Yeva Mikirtychan|Kelner|sala">Yeva Mikirtychan (Kelner)</option>
+                        <option value="Dominik Śpica|Kelner|sala">Dominik Śpica (Kelner)</option>
+                        <option value="Julia Lenartowicz|Kelner|sala">Julia Lenartowicz (Kelner)</option>
+                        <option value="Mariia Baranova|Kelner|sala">Mariia Baranova (Kelner)</option>
+                    </optgroup>
+                    <optgroup label="Zmywak">
+                        <option value="Jadwiga Chmiel|Zmywak|kuchnia">Jadwiga Chmiel (Zmywak)</option>
+                    </optgroup>
+                </select>
+                <label style="margin-top:6px;">PIN:</label>
+                <input type="password" inputmode="numeric" maxlength="6" id="pin-pracownik" placeholder="••••" style="width:100%; background:#2c2c2c; color:#fff; border:1px solid #444; padding:10px; border-radius:8px; font-size:14px; letter-spacing:4px; text-align:center;">
+                <div id="auth-error-pracownik" style="color:#e74c3c; font-size:11px; display:none;">Nieprawidłowy PIN.</div>
+                <button class="auth-btn primary" style="margin-top:10px; margin-bottom:0;" onclick="loginAsSelected('pracownik')">Wejdź</button>
+                <button class="auth-btn" style="margin-top:5px; margin-bottom:0; background:transparent; border:none;" onclick="hideLoginOptions()">← Wróć</button>
+            </div>
+            <div id="auth-manager-box" class="sub-auth-box">
+                <label>Wybierz profil managera:</label>
+                <select id="select-auth-manager">
+                    <option value="Yauheni Trusila|Menadżer|manager">Yauheni Trusila (Menadżer)</option>
+                    <option value="Karolina Irzyńska|Menedżer Regionalny|manager">Karolina Irzyńska (Menedżer Regionalny)</option>
+                </select>
+                <label style="margin-top:6px;">PIN:</label>
+                <input type="password" inputmode="numeric" maxlength="6" id="pin-manager" placeholder="••••" style="width:100%; background:#2c2c2c; color:#fff; border:1px solid #444; padding:10px; border-radius:8px; font-size:14px; letter-spacing:4px; text-align:center;">
+                <div id="auth-error-manager" style="color:#e74c3c; font-size:11px; display:none;">Nieprawidłowy PIN.</div>
+                <button class="auth-btn primary" style="margin-top:10px; margin-bottom:0;" onclick="loginAsSelected('manager')">Wejdź</button>
+                <button class="auth-btn" style="margin-top:5px; margin-bottom:0; background:transparent; border:none;" onclick="hideLoginOptions()">← Wróć</button>
+            </div>
+        </div>
+
         <div class="header">
             <div class="user-info">
                 <div>
-                    <div class="user-name">Tutti Santi 🍕</div>
-                    <div class="restaurant-location">Wiedza i standardy pracy</div>
+                    <div class="user-name" id="display-user-name">Cześć! 👋</div>
+                    <div class="restaurant-location">Tutti Santi Gdańsk</div>
                 </div>
+                <div class="user-role" id="display-user-role">Pracownik</div>
             </div>
+        </div>
+        <div class="profile-switcher">
+            <span>Zmień profil / Wyloguj:</span>
+            <button onclick="logoutToAuth()" style="background:#2c2c2c; color:#d4ac0d; border:1px solid #444; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:600;">Wyloguj 🔄</button>
         </div>
 
         <div class="content">
@@ -705,6 +769,11 @@
                 <div id="quiz-next-wrap" style="display:none; margin-top:12px;">
                     <button class="auth-btn primary" style="margin-bottom:0;" onclick="nextQuizQuestion()">Następne pytanie →</button>
                 </div>
+                <button class="auth-btn" style="margin-top:10px;" onclick="saveQuizResult()">Zakończ test i zapisz wynik</button>
+                <div class="rules-accordion" id="quiz-team-section" style="display:none;">
+                    <div class="rules-header" onclick="toggleAccordion(this)"><span>👥 Wyniki zespołu (manager)</span><span>▼</span></div>
+                    <div class="rules-content"><div id="quiz-team-list"></div></div>
+                </div>
             </div>
         </div>
 
@@ -718,16 +787,117 @@
     </div>
 
     <script>
+        // =====================================================
+        // 1) TUTAJ WKLEJ SWÓJ firebaseConfig z konsoli Firebase
+        // =====================================================
+        const firebaseConfig = {
+            apiKey: "WKLEJ_TUTAJ",
+            authDomain: "WKLEJ_TUTAJ",
+            projectId: "WKLEJ_TUTAJ",
+            storageBucket: "WKLEJ_TUTAJ",
+            messagingSenderId: "WKLEJ_TUTAJ",
+            appId: "WKLEJ_TUTAJ"
+        };
+        let db = null;
+        let dbReady = false;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            dbReady = true;
+        } catch (e) { dbReady = false; }
+
+        let currentUser = { name: "", role: "", dept: "" };
+        const staffByDept = {
+            kuchnia: ["Anton Lahir", "Kacper Szmagliński", "Olaf Wójcik", "Nazar Yakivchuk", "Dmytro Yesypchuk", "Hanna Vezdenko", "Ilya Sodel", "Jadwiga Chmiel"],
+            sala: ["Katarzyna Kysyluk", "Katarzyna Treder", "Katarzyna Żeleźnik", "Weronika Sawicka", "Aleksandra Godlewska", "Marita Formela", "Yeva Mikirtychan", "Dominik Śpica", "Julia Lenartowicz", "Mariia Baranova"]
+        };
+        const CREDENTIALS = {
+            "Yauheni Trusila": "914c948388ae30bdb0179a2f7bc91836d6af004171af735188fc1b69c286c864",
+            "Karolina Irzyńska": "ac1964eb089654e01f7bfb4871e0cd31ea4d2aa6e6e48774b6b9917b1341dbf6",
+            "Anton Lahir": "0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c",
+            "Kacper Szmagliński": "edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9",
+            "Olaf Wójcik": "b3282a2f2a28757b3a18ab833de16a9c54518c0b0cf493e3f0a7cf09386f326a",
+            "Nazar Yakivchuk": "318aee3fed8c9d040d35a7fc1fa776fb31303833aa2de885354ddf3d44d8fb69",
+            "Dmytro Yesypchuk": "7a99d42d79e9bafeaa5ccedaf0135267da4ccd197a99131a8cf15025cb54ab18",
+            "Hanna Vezdenko": "79f06f8fde333461739f220090a23cb2a79f6d714bee100d0e4b4af249294619",
+            "Ilya Sodel": "28fdc24c9abb066ea7343dc47c79a7cce15a581bcb30002a96903450bbe641a5",
+            "Katarzyna Kysyluk": "85d6385b945c0d602103db39b0b654b2af93b5127938e26a959c123f0789b948",
+            "Katarzyna Treder": "6c94e35ccc352d4e9ef0b99562cff995a5741ce8de8ad11b568892934daee366",
+            "Katarzyna Żeleźnik": "d7697570462f7562b83e81258de0f1e41832e98072e44c36ec8efec46786e24e",
+            "Weronika Sawicka": "2926a2731f4b312c08982cacf8061eb14bf65c1a87cc5d70e864e079c6220731",
+            "Aleksandra Godlewska": "a20a2b7bb0842d5cf8a0c06c626421fd51ec103925c1819a51271f2779afa730",
+            "Marita Formela": "6f6a4e56098cfd9af29e3ae549503b370211a4e94421457fe4cfd39a38a1fa08",
+            "Yeva Mikirtychan": "f1cfa5ebb149e8099d561aae57beed6c68f990f45a910ea9d7b460dbcc5350be",
+            "Dominik Śpica": "41c991eb6a66242c0454191244278183ce58cf4a6bcd372f799e4b9cc01886af",
+            "Julia Lenartowicz": "f37f3f2b0dc57a86dee4ba6ff855283bb4d2f0dea1c5bd1b708853444c2ffcec",
+            "Mariia Baranova": "7d12ba56e9f8b3dc64f77c87318c4f37bc12cfbf1a37573cdf3e4fa683f20155",
+            "Jadwiga Chmiel": "c1f330d0aff31c1c87403f1e4347bcc21aff7c179908723535f2b31723702525"
+        };
+
+        async function sha256Hex(str) {
+            const enc = new TextEncoder().encode(str);
+            const buf = await crypto.subtle.digest('SHA-256', enc);
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function showLoginOptions(type) {
+            document.getElementById('auth-main-buttons').style.display = 'none';
+            if (type === 'pracownik') {
+                document.getElementById('auth-pracownik-box').style.display = 'flex';
+                document.getElementById('auth-manager-box').style.display = 'none';
+            } else {
+                document.getElementById('auth-manager-box').style.display = 'flex';
+                document.getElementById('auth-pracownik-box').style.display = 'none';
+            }
+        }
+        function hideLoginOptions() {
+            document.getElementById('auth-main-buttons').style.display = 'block';
+            document.getElementById('auth-pracownik-box').style.display = 'none';
+            document.getElementById('auth-manager-box').style.display = 'none';
+        }
+
+        async function loginAsSelected(type) {
+            const selectId = type === 'pracownik' ? 'select-auth-pracownik' : 'select-auth-manager';
+            const pinId = type === 'pracownik' ? 'pin-pracownik' : 'pin-manager';
+            const errId = type === 'pracownik' ? 'auth-error-pracownik' : 'auth-error-manager';
+            const val = document.getElementById(selectId).value;
+            const pin = document.getElementById(pinId).value.trim();
+            const parts = val.split('|');
+            const name = parts[0];
+            const expected = CREDENTIALS[name];
+            const enteredHash = pin ? await sha256Hex(pin) : null;
+            if (!expected || enteredHash !== expected) {
+                document.getElementById(errId).style.display = 'block';
+                document.getElementById(pinId).value = '';
+                return;
+            }
+            document.getElementById(errId).style.display = 'none';
+            document.getElementById(pinId).value = '';
+            currentUser.name = parts[0];
+            currentUser.role = parts[1];
+            currentUser.dept = parts[2] || "";
+            document.getElementById('display-user-name').innerText = `Cześć, ${currentUser.name.split(' ')[0]}! 👋`;
+            document.getElementById('display-user-role').innerText = currentUser.role;
+            document.getElementById('auth-screen').classList.add('hidden');
+            applyPermissions();
+            renderDaily();
+        }
+        function logoutToAuth() {
+            hideLoginOptions();
+            document.getElementById('auth-screen').classList.remove('hidden');
+            switchScreen('screen-home');
+        }
+        function isManager() { return currentUser.dept === 'manager'; }
+        function applyPermissions() {
+            try { document.getElementById('quiz-team-section').style.display = isManager() ? 'block' : 'none'; } catch (e) {}
+        }
+
         function switchScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             if (screenId === 'screen-test' && !quizPool.length) startQuiz();
         }
-
-        function toggleAccordion(header) {
-            header.parentElement.classList.toggle('open');
-        }
-
+        function toggleAccordion(header) { header.parentElement.classList.toggle('open'); }
         function escapeHtml(str) {
             const d = document.createElement('div');
             d.innerText = str == null ? '' : String(str);
@@ -806,7 +976,6 @@
 ["Pizza Gourmet","Santa Lucia","Crème Fraiche, Mozzarella di Bufala, Porchetta di Ariccia, Stracciatella, sos pistacjowy, pieprz czerwony, pistacje z Sycylii, autorskie pesto pietruszkowe"],
 ["Pizza Gourmet","Santa Rosalia","szynka Prosciutto di San Daniele dojrzewająca 24 miesiące, pomidory z oliwą czosnkową i Grana Padano, Stracciatella, pomidory karmelizowane, krystalizowana bazylia, autorskie pesto pietruszkowe"]
         ].map(r => ({ cat: r[0], name: r[1], desc: r[2] }));
-
         const slownikTerms = [
             { term: "Prosciutto Crudo", def: "dojrzewająca, surowa szynka wieprzowa (tzw. szynka parmeńska) — suszona na powietrzu, niegotowana." },
             { term: "Prosciutto Cotto", def: "szynka gotowana." },
@@ -827,7 +996,6 @@
             { term: "Provolone", def: "półtwardy, wędzony ser włoski." },
             { term: "Ricotta", def: "delikatny, twarogopodobny serek serwatkowy." }
         ];
-
         const audytQA = [
             { q: "Gość-audytor prosi o polecenie pizzy — co robisz?", a: "Aktywnie polecasz pizzę, wykazujesz się znajomością składników i dobierasz propozycję do gustu pytającego." },
             { q: "Dlaczego pizza w Tutti Santi jest lekkostrawna?", a: "Bo nasze ciasto dojrzewa minimum 48 godzin." },
@@ -887,9 +1055,7 @@
                 if (!screen) return;
                 const headerSpan = el.querySelector('.rules-header span, .manual-header span');
                 const content = el.querySelector('.rules-content, .manual-content');
-                if (headerSpan && content) {
-                    idx.push({ title: headerSpan.textContent.trim(), text: content.textContent.trim(), screen: screen.id, el });
-                }
+                if (headerSpan && content) idx.push({ title: headerSpan.textContent.trim(), text: content.textContent.trim(), screen: screen.id, el });
             });
             document.querySelectorAll('.wine-card').forEach(el => {
                 const name = el.querySelector('.wine-name');
@@ -900,45 +1066,30 @@
         }
         const searchIndex = buildSearchIndex();
         let lastSearchResults = [];
-
         function runSearch() {
             const q = document.getElementById('home-search').value.trim().toLowerCase();
             const box = document.getElementById('search-results');
             if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
-            lastSearchResults = searchIndex.filter(item =>
-                item.title.toLowerCase().includes(q) || item.text.toLowerCase().includes(q)
-            ).slice(0, 8);
+            lastSearchResults = searchIndex.filter(item => item.title.toLowerCase().includes(q) || item.text.toLowerCase().includes(q)).slice(0, 8);
             box.style.display = 'block';
             box.innerHTML = lastSearchResults.length
-                ? lastSearchResults.map((r, i) => `
-                    <div class="search-result" onclick="goToSearchResult(${i})">
-                        <div class="task-title">${escapeHtml(r.title)}</div>
-                        <div style="font-size:11px; color:#999;">${escapeHtml(r.text.slice(0, 90))}${r.text.length > 90 ? '…' : ''}</div>
-                    </div>
-                `).join('')
+                ? lastSearchResults.map((r, i) => `<div class="search-result" onclick="goToSearchResult(${i})"><div class="task-title">${escapeHtml(r.title)}</div><div style="font-size:11px; color:#999;">${escapeHtml(r.text.slice(0, 90))}${r.text.length > 90 ? '…' : ''}</div></div>`).join('')
                 : '<div style="font-size:12px; color:#888;">Brak wyników.</div>';
         }
         document.getElementById('home-search').addEventListener('input', runSearch);
-
         function goToSearchResult(i) {
             const r = lastSearchResults[i];
             if (!r) return;
             switchScreen(r.screen);
-            if (r.el.classList.contains('rules-accordion') || r.el.classList.contains('manual-category')) {
-                r.el.classList.add('open');
-            }
+            if (r.el.classList.contains('rules-accordion') || r.el.classList.contains('manual-category')) r.el.classList.add('open');
             document.getElementById('home-search').value = '';
             document.getElementById('search-results').style.display = 'none';
             setTimeout(() => r.el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
         }
 
         const quizBank = [...audytQA.map(x => ({ cat: 'audyt', q: x.q, a: x.a }))];
-        menuRows.forEach(m => {
-            quizBank.push({ cat: 'menu', q: `Jaki jest skład pizzy / dania „${m.name}”?`, a: m.desc });
-        });
-        slownikTerms.forEach(t => {
-            quizBank.push({ cat: 'menu', q: `Co to jest ${t.term}?`, a: t.def });
-        });
+        menuRows.forEach(m => quizBank.push({ cat: 'menu', q: `Jaki jest skład pizzy / dania „${m.name}”?`, a: m.desc }));
+        slownikTerms.forEach(t => quizBank.push({ cat: 'menu', q: `Co to jest ${t.term}?`, a: t.def }));
         document.querySelectorAll('.rules-accordion, .manual-category').forEach(el => {
             const screen = el.closest('.screen');
             if (!screen || !['screen-zasady', 'screen-baza', 'screen-wina'].includes(screen.id)) return;
@@ -954,19 +1105,12 @@
             if (name && details) quizBank.push({ cat: 'wino', q: `Co wiesz o winie „${name.textContent.trim()}”?`, a: details.textContent.trim().replace(/\s+/g, ' ') });
         });
 
-        let quizPool = [];
-        let quizIdx = 0;
-        let quizStats = { done: 0, know: 0 };
-
+        let quizPool = [], quizIdx = 0, quizStats = { done: 0, know: 0 };
         function shuffleArr(arr) {
             const a = arr.slice();
-            for (let i = a.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [a[i], a[j]] = [a[j], a[i]];
-            }
+            for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
             return a;
         }
-
         function showQuizQuestion() {
             const qEl = document.getElementById('quiz-question');
             const choicesBox = document.getElementById('quiz-choices');
@@ -977,7 +1121,6 @@
             qEl.textContent = current.q;
             renderQuizChoices(current);
         }
-
         function renderQuizChoices(current) {
             const box = document.getElementById('quiz-choices');
             const pool = quizBank.filter(x => x.a !== current.a);
@@ -985,32 +1128,21 @@
             const source = sameCat.length >= 3 ? sameCat : pool;
             const distractors = shuffleArr(source).slice(0, 3).map(x => x.a);
             const options = shuffleArr([current.a, ...distractors]);
-            box.innerHTML = options.map(opt => `
-                <button class="auth-btn" style="margin-bottom:0; text-align:left; white-space:normal; line-height:1.4;" onclick="selectQuizAnswer(this, ${opt === current.a})">${escapeHtml(opt)}</button>
-            `).join('');
+            box.innerHTML = options.map(opt => `<button class="auth-btn" style="margin-bottom:0; text-align:left; white-space:normal; line-height:1.4;" onclick="selectQuizAnswer(this, ${opt === current.a})">${escapeHtml(opt)}</button>`).join('');
         }
-
         function selectQuizAnswer(btn, correct) {
             const current = quizPool[quizIdx];
             document.querySelectorAll('#quiz-choices button').forEach(b => {
                 b.disabled = true;
-                if (b.textContent.trim() === current.a.trim()) {
-                    b.style.background = '#1e5c33'; b.style.borderColor = '#1e5c33'; b.style.color = '#9be8ae';
-                } else if (b === btn && !correct) {
-                    b.style.background = '#442222'; b.style.borderColor = '#442222'; b.style.color = '#f3a';
-                }
+                if (b.textContent.trim() === current.a.trim()) { b.style.background = '#1e5c33'; b.style.borderColor = '#1e5c33'; b.style.color = '#9be8ae'; }
+                else if (b === btn && !correct) { b.style.background = '#442222'; b.style.borderColor = '#442222'; b.style.color = '#f3a'; }
             });
             quizStats.done++;
             if (correct) quizStats.know++;
             updateQuizStats();
             document.getElementById('quiz-next-wrap').style.display = 'block';
         }
-
-        function nextQuizQuestion() {
-            quizIdx++;
-            showQuizQuestion();
-        }
-
+        function nextQuizQuestion() { quizIdx++; showQuizQuestion(); }
         function startQuiz() {
             const cat = document.getElementById('quiz-category').value;
             quizPool = shuffleArr(cat === 'all' ? quizBank : quizBank.filter(q => q.cat === cat));
@@ -1019,10 +1151,32 @@
             updateQuizStats();
             showQuizQuestion();
         }
-
         function updateQuizStats() {
             const el = document.getElementById('quiz-stats');
             if (el) el.textContent = `Przerobione: ${quizStats.done} • Dobrze: ${quizStats.know}`;
+        }
+
+        async function saveQuizResult() {
+            if (!dbReady || !currentUser.name || !quizStats.done) return;
+            const cat = document.getElementById('quiz-category').value;
+            try {
+                await db.collection('quizResults').add({ person: currentUser.name, cat, done: quizStats.done, know: quizStats.know, ts: Date.now() });
+            } catch (e) { console.error(e); }
+        }
+        function renderQuizTeam(results) {
+            const box = document.getElementById('quiz-team-list');
+            if (!box || !isManager()) return;
+            const recent = results.slice(-20).reverse();
+            box.innerHTML = recent.length ? recent.map(r => `
+                <div class="task-item"><div class="task-title">${escapeHtml(r.person)} — ${escapeHtml(r.cat)}</div>
+                <div class="task-meta"><span>${r.know}/${r.done} dobrze (${Math.round(100 * r.know / r.done)}%)</span></div></div>
+            `).join('') : '<div style="font-size:12px; color:#888;">Brak wyników.</div>';
+        }
+        if (dbReady) {
+            db.collection('quizResults').orderBy('ts').onSnapshot(snap => {
+                const results = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderQuizTeam(results);
+            }, err => console.error(err));
         }
 
         function dayOfYear() {
@@ -1030,7 +1184,6 @@
             const start = new Date(now.getFullYear(), 0, 0);
             return Math.floor((now - start) / 86400000);
         }
-
         function renderDaily() {
             const titleEl = document.getElementById('daily-title');
             const textEl = document.getElementById('daily-text');
@@ -1042,7 +1195,6 @@
             titleEl.textContent = item.q;
             textEl.textContent = item.a;
         }
-
         function showAnotherDaily() {
             const titleEl = document.getElementById('daily-title');
             const textEl = document.getElementById('daily-text');
@@ -1052,7 +1204,6 @@
             titleEl.textContent = item.q;
             textEl.textContent = item.a;
         }
-        renderDaily();
     </script>
 </body>
 </html>
