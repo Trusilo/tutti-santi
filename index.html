@@ -318,6 +318,7 @@
                         <option value="Dominik Śpica|Kelner|sala">Dominik Śpica (Kelner)</option>
                         <option value="Julia Lenartowicz|Kelner|sala">Julia Lenartowicz (Kelner)</option>
                         <option value="Mariia Baranova|Kelner|sala">Mariia Baranova (Kelner)</option>
+                        <option value="Izabela Szamocka|Kelner|sala">Izabela Szamocka (Kelner)</option>
                     </optgroup>
                     <optgroup label="Zmywak">
                         <option value="Jadwiga Chmiel|Zmywak|kuchnia">Jadwiga Chmiel (Zmywak)</option>
@@ -809,7 +810,7 @@
         let currentUser = { name: "", role: "", dept: "" };
         const staffByDept = {
             kuchnia: ["Anton Lahir", "Kacper Szmagliński", "Olaf Wójcik", "Nazar Yakivchuk", "Dmytro Yesypchuk", "Hanna Vezdenko", "Ilya Sodel", "Jadwiga Chmiel"],
-            sala: ["Katarzyna Kysyluk", "Katarzyna Treder", "Katarzyna Żeleźnik", "Weronika Sawicka", "Aleksandra Godlewska", "Marita Formela", "Yeva Mikirtychan", "Dominik Śpica", "Julia Lenartowicz", "Mariia Baranova"]
+            sala: ["Katarzyna Kysyluk", "Katarzyna Treder", "Katarzyna Żeleźnik", "Weronika Sawicka", "Aleksandra Godlewska", "Marita Formela", "Yeva Mikirtychan", "Dominik Śpica", "Julia Lenartowicz", "Mariia Baranova", "Izabela Szamocka"]
         };
         const CREDENTIALS = {
             "Yauheni Trusila": "914c948388ae30bdb0179a2f7bc91836d6af004171af735188fc1b69c286c864",
@@ -831,6 +832,7 @@
             "Dominik Śpica": "41c991eb6a66242c0454191244278183ce58cf4a6bcd372f799e4b9cc01886af",
             "Julia Lenartowicz": "f37f3f2b0dc57a86dee4ba6ff855283bb4d2f0dea1c5bd1b708853444c2ffcec",
             "Mariia Baranova": "7d12ba56e9f8b3dc64f77c87318c4f37bc12cfbf1a37573cdf3e4fa683f20155",
+            "Izabela Szamocka": "72d1b5da6eeaf1789df86487da50ad5e9dadb5ffaecb56b6de592aa286c9c1b8",
             "Jadwiga Chmiel": "c1f330d0aff31c1c87403f1e4347bcc21aff7c179908723535f2b31723702525"
         };
 
@@ -905,9 +907,9 @@
         }
 
         const menuRows = [
-["Nowości","Pizza Fresca Campagna","sos Crème Fraiche, Mozzarella di Bufala, krótko marynowane ogórek, rzodkiewka, szalotka, oliwa z sycylijskich oliwek, żółtko, koperek, czarny pieprz"],
-["Nowości","Przystawka Caprese di Bufala","pomidory daktylowe i rzymskie, dressing miodowo-musztardowy, Mozzarella di Bufala, bazylia, szpinak, orzeszki pini"],
-["Nowości","Insalata di Burrata e Verdure","Burrata, roszponka, szpinak, pesto pietruszkowe, koper włoski, zielone jabłko, groszek cukrowy, rzodkiewka, mięta, bazylia"],
+["Nowości","Pizza San Gervasio","sos mascarpone, Mozzarella di Bufala, Bresaola, rukola, bazylia, pesto bazyliowe, pieprz, cytryna, Parmigiano Reggiano, espuma parmezanowa"],
+["Nowości","Makaron Sapori del Bosco","spaghettoni, sos grzybowy, grzyby shiitake i shimeji, borowik, chipsy z boczniaka, pietruszka, oliwa zielona, Grana Padano"],
+["Nowości","Pizza Gourmet San Nicola","sos grzybowy, Mozzarella di Bufala, tatar wołowy z oliwą truflową, grzyby smażone, chipsy z topinamburu, Grana Padano"],
 ["Nowości","Ravioli di Burrata","pierożki nadziewane Burratą, emulsja z sycylijskiej oliwy, Parmigiano Reggiano, masło, szałwia, sok i skórka z cytryny"],
 ["Nowości","Selekcja oliw PREMIUM","3 oliwy extra vergine: Chiaramonte Gulfi, Tradizione, De Coppini; podawane z pieczywem własnego wypieku i chrupiącym jabłkiem"],
 ["Przystawki","Krem z pomidorów","bulion warzywny, świeży tymianek, włoski ser Pecorino Romano"],
@@ -997,19 +999,27 @@
             { term: "Ricotta", def: "delikatny, twarogopodobny serek serwatkowy." }
         ];
         const audytQA = [
-            { q: "Gość-audytor prosi o polecenie pizzy — co robisz?", a: "Aktywnie polecasz pizzę, wykazujesz się znajomością składników i dobierasz propozycję do gustu pytającego." },
-            { q: "Dlaczego pizza w Tutti Santi jest lekkostrawna?", a: "Bo nasze ciasto dojrzewa minimum 48 godzin." },
-            { q: "Dlaczego nie mogę skomponować własnej pizzy?", a: "Mamy bardzo szeroki wybór pizz w karcie — na pewno znajdzie się coś odpowiedniego, ewentualnie można coś dodać lub odjąć." },
-            { q: "Czy są dostępne dania bezglutenowe?", a: "Nie ma dań w 100% bezglutenowych, ale mamy ciasto z mąki bezglutenowej — jesteśmy jednak pizzerią, więc śladowe ilości glutenu mogą się pojawić." },
-            { q: "Jaka kawa jest w ofercie restauracji?", a: "Lavazza Tierra Selection — ziarna z Ameryki Południowej: Nikaragua, Peru, Brazylia." },
-            { q: "Jakie alergeny znajdują się w pizzy San Sebastiano?", a: "Kod QR znajduje się na ostatniej stronie menu — można zeskanować i sprawdzić, albo zapytać obsługi." },
-            { q: "Poproszono Cię o polecenie asortymentu z kredensu — co robisz?", a: "Trzeba coś konkretnego polecić, np. oliwę, mąkę, karczochy — cokolwiek z wystawki na kredensie." },
-            { q: "Jak przygotować się na pytania o aktualne nowości?", a: "Trzeba znać nowości, które mamy w danym sezonie — sprawdzać kartę i ogłoszenia na bieżąco." },
-            { q: "Czy semolina to inaczej mówiąc kasza manna?", a: "Nie." },
-            { q: "Czy w Tutti Santi jest serwowana pizza neapolitańska?", a: "Nie." },
-            { q: "Czy dania makaronowe powinny być wydawane na ciepłych talerzach?", a: "Tak." },
-            { q: "Czy stojak pod pizzę Gourmet dostarczamy niezwłocznie po przyjęciu zamówienia?", a: "Tak." },
-            { q: "Czy standardem jest wydawanie pizz do 35 minut?", a: "Nie." }
+            { q: "Gość-audytor prosi o polecenie pizzy — co robisz?", a: "Aktywnie polecasz pizzę, wykazujesz się znajomością składników i dobierasz propozycję do gustu pytającego.",
+              opts: ["Mówisz, że wszystkie pizze są dobre i to subiektywna sprawa.", "Prosisz kolegę z kuchni, żeby wyszedł i doradził zamiast Ciebie.", "Odsyłasz gościa do karty dań bez komentarza."] },
+            { q: "Dlaczego pizza w Tutti Santi jest lekkostrawna?", a: "Bo nasze ciasto dojrzewa minimum 48 godzin.",
+              opts: ["Ciasto dojrzewa 24 godziny.", "Nasze ciasto w ogóle nie dojrzewa.", "Ciasto dojrzewa 72 godziny."] },
+            { q: "Dlaczego nie mogę skomponować własnej pizzy?", a: "Mamy bardzo szeroki wybór pizz w karcie — na pewno znajdzie się coś odpowiedniego, ewentualnie można coś dodać lub odjąć.",
+              opts: ["Bo szef kuchni tego zabrania bez wyjątków.", "Bo nasz piec obsługuje tylko gotowe receptury.", "Bo to generuje dodatkowe koszty dla gościa."] },
+            { q: "Czy są dostępne dania bezglutenowe?", a: "Nie ma dań w 100% bezglutenowych, ale mamy ciasto z mąki bezglutenowej — jesteśmy jednak pizzerią, więc śladowe ilości glutenu mogą się pojawić.",
+              opts: ["Tak, wszystkie dania są w 100% bezglutenowe.", "Nie, nie mamy żadnej opcji bezglutenowej.", "Tylko sałatki są bezglutenowe."] },
+            { q: "Jaka kawa jest w ofercie restauracji?", a: "Lavazza Tierra Selection — ziarna z Ameryki Południowej: Nikaragua, Peru, Brazylia.",
+              opts: ["Illy Classico — ziarna z Afryki.", "Własna palarnia Tutti Santi.", "Segafredo Intermezzo."] },
+            { q: "Jakie alergeny znajdują się w pizzy San Sebastiano?", a: "Kod QR znajduje się na ostatniej stronie menu — można zeskanować i sprawdzić, albo zapytać obsługi.",
+              opts: ["Trzeba to wiedzieć na pamięć, menu nie ma takiej informacji.", "Alergeny podajemy tylko telefonicznie do centrali.", "San Sebastiano nie zawiera żadnych alergenów."] },
+            { q: "Poproszono Cię o polecenie asortymentu z kredensu — co robisz?", a: "Trzeba coś konkretnego polecić, np. oliwę, mąkę, karczochy — cokolwiek z wystawki na kredensie.",
+              opts: ["Mówisz, że kredens jest tylko dekoracją.", "Odsyłasz gościa do managera.", "Proponujesz tylko napoje, bo kredens Cię nie dotyczy."] },
+            { q: "Jak przygotować się na pytania o aktualne nowości?", a: "Trzeba znać nowości, które mamy w danym sezonie — sprawdzać kartę i ogłoszenia na bieżąco.",
+              opts: ["Nowości nie zmieniają się nigdy, nie trzeba ich śledzić.", "Wystarczy znać tylko klasyczne pizze.", "To odpowiedzialność wyłącznie managera."] },
+            { q: "Czy semolina to inaczej mówiąc kasza manna?", a: "Nie.", opts: ["Tak.", "Tylko częściowo.", "To zależy od dostawcy."] },
+            { q: "Czy w Tutti Santi jest serwowana pizza neapolitańska?", a: "Nie.", opts: ["Tak.", "Tylko w wersji Gourmet.", "Tak, ale wyłącznie na wynos."] },
+            { q: "Czy dania makaronowe powinny być wydawane na ciepłych talerzach?", a: "Tak.", opts: ["Nie.", "Tylko latem.", "Zależy od rodzaju makaronu."] },
+            { q: "Czy stojak pod pizzę Gourmet dostarczamy niezwłocznie po przyjęciu zamówienia?", a: "Tak.", opts: ["Nie.", "Dopiero przy wydaniu dania.", "Tylko na życzenie gościa."] },
+            { q: "Czy standardem jest wydawanie pizz do 35 minut?", a: "Nie.", opts: ["Tak.", "Tak, ale tylko w weekendy.", "Zależy wyłącznie od obłożenia sali."] }
         ];
 
         function renderMenu() {
@@ -1087,7 +1097,7 @@
             setTimeout(() => r.el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
         }
 
-        const quizBank = [...audytQA.map(x => ({ cat: 'audyt', q: x.q, a: x.a }))];
+        const quizBank = [...audytQA.map(x => ({ cat: 'audyt', q: x.q, a: x.a, opts: x.opts }))];
         menuRows.forEach(m => quizBank.push({ cat: 'menu', q: `Jaki jest skład pizzy / dania „${m.name}”?`, a: m.desc }));
         slownikTerms.forEach(t => quizBank.push({ cat: 'menu', q: `Co to jest ${t.term}?`, a: t.def }));
         document.querySelectorAll('.rules-accordion, .manual-category').forEach(el => {
@@ -1123,10 +1133,17 @@
         }
         function renderQuizChoices(current) {
             const box = document.getElementById('quiz-choices');
-            const pool = quizBank.filter(x => x.a !== current.a);
-            const sameCat = pool.filter(x => x.cat === current.cat);
-            const source = sameCat.length >= 3 ? sameCat : pool;
-            const distractors = shuffleArr(source).slice(0, 3).map(x => x.a);
+            let distractors;
+            if (current.opts && current.opts.length) {
+                distractors = current.opts;
+            } else {
+                const pool = quizBank.filter(x => x.a !== current.a);
+                const sameCat = pool.filter(x => x.cat === current.cat);
+                const len = current.a.length;
+                const similarLen = sameCat.filter(x => x.a.length >= len * 0.5 && x.a.length <= len * 1.8);
+                const source = similarLen.length >= 3 ? similarLen : (sameCat.length >= 3 ? sameCat : pool);
+                distractors = shuffleArr(source).slice(0, 3).map(x => x.a);
+            }
             const options = shuffleArr([current.a, ...distractors]);
             box.innerHTML = options.map(opt => `<button class="auth-btn" style="margin-bottom:0; text-align:left; white-space:normal; line-height:1.4;" onclick="selectQuizAnswer(this, ${opt === current.a})">${escapeHtml(opt)}</button>`).join('');
         }
