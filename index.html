@@ -1203,8 +1203,19 @@
         }
 
         const quizBank = [...audytQA.map(x => ({ cat: 'audyt', q: x.q, a: x.a, opts: x.opts }))];
-        menuRows.forEach(m => quizBank.push({ cat: 'menu', group: 'menu-' + m.cat, q: `Jaki jest skład pizzy / dania „${m.name}”?`, a: m.desc }));
-        slownikTerms.forEach(t => quizBank.push({ cat: 'menu', group: 'slownik', q: `Co to jest ${t.term}?`, a: t.def }));
+        menuRows.forEach(m => {
+            const desc = splitItems(m.desc.replace(/\s*\((pikantne|bez mięsa|polecane dla dzieci)\)/gi, ''), ', ')
+                .map(t => t.replace(/^sos z włoskich pomidorów$/i, 'sos pomidorowy')
+                           .replace(/^(włoskie|włoski|włoska)\s+/i, '')
+                           .replace(/^dojrzewający ser pleśniowy\s+/i, '')
+                           .replace(/^ser\s+/i, ''))
+                .join(', ');
+            if (splitItems(desc, ', ').length < 3) return; // za mało składników, pytanie byłoby banalne
+            const dessert = /Panna Cotta|Sernik|Crostata/.test(m.name);
+            quizBank.push({ cat: 'menu', group: 'menu-' + (dessert ? 'desery' : m.cat), near: { sep: ', ' }, q: `Jaki jest skład pizzy / dania „${m.name}”?`, a: desc });
+        });
+        const serTerms = ['Stracciatella', 'Burrata', 'Mozzarella di Bufala', 'Grana Padano', 'Pecorino Romano', 'Gorgonzola', 'Provolone', 'Ricotta'];
+        slownikTerms.forEach(t => quizBank.push({ cat: 'menu', group: serTerms.includes(t.term) ? 'slownik-ser' : 'slownik-mieso', q: `Co to jest ${t.term}?`, a: t.def }));
         const curatedQuiz = [
             // ---- ZASADY ----
             { cat: 'zasady', q: "W jakich godzinach sprzedajemy pizzę gourmet?", a: "13:00–20:30", opts: ["12:00–21:00", "14:00–22:00", "13:00–19:30"] },
@@ -1270,20 +1281,94 @@
         ];
         curatedQuiz.forEach(x => quizBank.push(x));
 
-        // Wino: pytania generowane z kart win (odpowiedzi i błędne opcje z tego samego pola)
-        document.querySelectorAll('#screen-wina .wine-card').forEach(el => {
-            const name = el.querySelector('.wine-name');
-            const details = el.querySelector('.wine-details');
-            if (!name || !details) return;
-            const fields = {};
-            details.innerHTML.split(/<br\s*\/?>/i).forEach(part => {
-                const m = part.replace(/^\s*•\s*/, '').match(/^\s*<strong>(.*?):<\/strong>\s*([\s\S]*)$/);
-                if (m) fields[m[1].trim()] = m[2].replace(/<[^>]+>/g, '').trim();
+        // Wino: pytania generowane z kart win (zapach/smak, ekologiczne, wegańskie, bez siarki, beczka, dojrzewanie, słodycz)
+        (function buildWineQuestions() {
+            const screen = document.getElementById('screen-wina');
+            if (!screen) return;
+            const wines = [];
+            let section = '';
+            Array.from(screen.children).forEach(el => {
+                if (el.classList.contains('wine-section-title')) { section = el.textContent.trim(); return; }
+                if (!el.classList.contains('wine-card')) return;
+                const nameEl = el.querySelector('.wine-name'), detEl = el.querySelector('.wine-details');
+                if (!nameEl || !detEl) return;
+                const fields = {};
+                detEl.innerHTML.split(/<br\s*\/?>/i).forEach(part => {
+                    const m = part.replace(/^\s*•\s*/, '').match(/^\s*<strong>(.*?):<\/strong>\s*([\s\S]*)$/);
+                    if (m) fields[m[1].trim()] = m[2].replace(/<[^>]+>/g, '').trim();
+                });
+                const name = nameEl.textContent.trim();
+                const text = detEl.textContent.replace(/\s+/g, ' ').trim();
+                wines.push({
+                    name, section, fields, text,
+                    profil: fields['Profil'] || fields['Aromat i smak'] || '',
+                    organic: /organic|ekologiczn/i.test(name + ' ' + text),
+                    vegan: /wegańsk/i.test(name + ' ' + text),
+                    noSulfites: /senza solfiti|bez siarki/i.test(name + ' ' + text),
+                    oak: /dębie|beczc/i.test(text),
+                    nonAlc: /bezalkoholowe/i.test(name),
+                    bottlesOnly: /tylko butelki/i.test(name)
+                });
             });
-            const wine = name.textContent.trim();
-            if (fields['Polecane do']) quizBank.push({ cat: 'wino', group: 'wino-polecane', q: `Do jakich dań polecamy wino „${wine}”?`, a: fields['Polecane do'] });
-            if (fields['Profil']) quizBank.push({ cat: 'wino', group: 'wino-profil', q: `Jaki jest profil smakowy wina „${wine}”?`, a: fields['Profil'] });
-        });
+            const sample = (arr, n) => shuffleArr(arr).slice(0, n);
+            // nazwy w odpowiedziach bez dopisków, które zdradzają odpowiedź
+            const baseName = n => n.replace(/\s+–\s+.*$/, '').trim();
+            const label = (w, flag) => {
+                let n = baseName(w.name);
+                if (flag === 'organic' || flag === 'noSulfites') n = n.replace(/\s*\bOrganic\b/i, '').replace(/\s*„?Senza Solfiti”?/i, '');
+                if (flag === 'nonAlc') n = n.replace(/\s*\(Bezalkoholowe,[^)]*\)/i, '');
+                return n.replace(/\s{2,}/g, ' ').trim();
+            };
+
+            // dotychczasowe pytania: dania do wina / profil wina
+            wines.forEach(w => {
+                if (w.fields['Polecane do']) quizBank.push({ cat: 'wino', group: 'wino-polecane-' + w.section, near: { sep: ', ', end: '.' }, q: `Do jakich dań polecamy wino: ${baseName(w.name)}?`, a: w.fields['Polecane do'] });
+                if (w.fields['Profil']) quizBank.push({ cat: 'wino', group: 'wino-profil-' + w.section, q: `Jaki jest profil smakowy wina: ${baseName(w.name)}?`, a: w.fields['Profil'] });
+            });
+
+            // zapach / smak -> które to wino
+            wines.filter(w => w.profil).forEach(w => {
+                const same = wines.filter(x => x.name !== w.name && x.section === w.section && x.profil);
+                if (same.length < 3) return; // np. jedno prosecco w sekcji — pytanie byłoby banalne
+                const src = same;
+                const closest = src.map(x => ({ x, s: similarity(w.profil, x.profil) + Math.random() * 0.05 })).sort((a, b) => b.s - a.s).slice(0, 6).map(r => r.x);
+                quizBank.push({ cat: 'wino', q: `Które wino ma taki zapach i smak: „${w.profil}”?`, a: baseName(w.name), opts: sample(closest, 3).map(x => baseName(x.name)) });
+            });
+
+            // cechy wina (wg karty win)
+            const attrQ = (flag, question, max) => {
+                sample(wines.filter(w => w[flag]), max).forEach(w => {
+                    const no = wines.filter(x => !x[flag] && x.name !== w.name && (flag === 'nonAlc' || !x.nonAlc));
+                    const same = no.filter(x => x.section === w.section);
+                    const pool = same.length >= 3 ? same : no;
+                    if (pool.length < 3) return;
+                    quizBank.push({ cat: 'wino', q: question, a: label(w, flag), opts: sample(pool, 3).map(x => label(x, flag)) });
+                });
+            };
+            attrQ('organic', 'Które z tych win jest ekologiczne (organic)?', 4);
+            attrQ('vegan', 'Które z tych win jest wegańskie (wg karty win)?', 4);
+            attrQ('noSulfites', 'Które z tych win jest bez dodatku siarki (senza solfiti)?', 2);
+            attrQ('oak', 'Które z tych win dojrzewa w dębie lub beczce (wg karty win)?', 4);
+            attrQ('nonAlc', 'Które z tych win jest bezalkoholowe?', 2);
+            attrQ('bottlesOnly', 'Które z tych win podajemy tylko w butelkach?', 4);
+
+            // dojrzewanie w miesiącach
+            const monthWord = n => n === 1 ? 'miesiąc' : ((n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14)) ? 'miesiące' : 'miesięcy');
+            wines.forEach(w => {
+                const m = w.text.match(/(\d+)\s*m-(?:cy|ce)/i);
+                if (!m) return;
+                const n = parseInt(m[1], 10);
+                const alts = [2, 3, 4, 6, 8, 10, 12, 15, 18, 24, 30, 36].filter(x => x !== n).sort((a, b) => Math.abs(Math.log(a / n)) - Math.abs(Math.log(b / n))).slice(0, 4);
+                quizBank.push({ cat: 'wino', q: `Ile miesięcy dojrzewa wino (wg karty win): ${baseName(w.name)}?`, a: `${n} ${monthWord(n)}`, opts: sample(alts, 3).map(x => `${x} ${monthWord(x)}`) });
+            });
+
+            // słodycz (tylko tam, gdzie jest w karcie)
+            quizBank.push(
+                { cat: 'wino', q: 'Prosecco Lamia jest Extra Dry — jakie jest pod względem słodyczy?', a: 'Półwytrawne', opts: ['Wytrawne', 'Półsłodkie', 'Słodkie'] },
+                { cat: 'wino', q: 'Jakie jest bezalkoholowe wino Sauvignon Blanc „Genio Español Zero”?', a: 'Wytrawne', opts: ['Półwytrawne', 'Półsłodkie', 'Słodkie'] },
+                { cat: 'wino', q: 'Jakie jest bezalkoholowe wino Tempranillo „Genio Español Zero”?', a: 'Wytrawne', opts: ['Półwytrawne', 'Półsłodkie', 'Słodkie'] }
+            );
+        })();
 
         let quizPool = [], quizIdx = 0, quizStats = { done: 0, know: 0, wrong: [] };
         function shuffleArr(arr) {
@@ -1301,19 +1386,76 @@
             qEl.textContent = current.q;
             renderQuizChoices(current);
         }
+        // ---- podobne (trudne do odgadnięcia) błędne odpowiedzi ----
+        function splitItems(s, sep) { return s.split(sep).map(x => x.trim()).filter(Boolean); }
+        function wordsOf(s) {
+            return new Set(String(s).toLowerCase().replace(/[^a-ząćęłńóśźż0-9 ]/g, ' ').split(/\s+/).filter(w => w.length >= 4));
+        }
+        function similarity(a, b) {
+            const A = wordsOf(a), B = wordsOf(b);
+            if (!A.size || !B.size) return 0;
+            let inter = 0;
+            A.forEach(w => { if (B.has(w)) inter++; });
+            return inter / (A.size + B.size - inter);
+        }
+        // wybiera odpowiedzi najbardziej podobne do poprawnej
+        function mostSimilar(correct, answers, n) {
+            const uniq = [...new Set(answers)].filter(a => a !== correct);
+            const lenRatio = a => Math.min(a.length, correct.length) / Math.max(a.length, correct.length);
+            const ranked = uniq.map(a => ({ a, s: similarity(correct, a) + 0.5 * lenRatio(a) + Math.random() * 0.05 })).sort((x, y) => y.s - x.s);
+            return shuffleArr(ranked.slice(0, n + 2).map(x => x.a)).slice(0, n);
+        }
+        // poprawna lista składników z 1–2 podmienionymi pozycjami (np. inny ser, inna wędlina)
+        function nearMisses(correct, groupAnswers, n, sep, end) {
+            const strip = s => (end && s.endsWith(end)) ? s.slice(0, -end.length) : s;
+            const lower = x => x.toLowerCase();
+            const base = splitItems(strip(correct), sep);
+            const all = groupAnswers.map(a => splitItems(strip(a), sep));
+            const freq = {};
+            all.forEach(list => new Set(list.map(lower)).forEach(t => { freq[t] = (freq[t] || 0) + 1; }));
+            const limit = Math.max(2, Math.ceil(all.length * 0.4));
+            const baseSet = new Set(base.map(lower));
+            const candidates = [...new Set(all.flat())].filter(t => !baseSet.has(lower(t)) && freq[lower(t)] <= limit
+                && !/^[a-ząćęłńóśźż]+(?:em|ą)\s+i\s/i.test(t)
+                && !base.some(b => lower(b).includes(lower(t)) || lower(t).includes(lower(b))));
+            if (candidates.length < 3 || !base.length) return [];
+            let replaceable = base.map((t, i) => i).filter(i => (freq[lower(base[i])] || 0) <= limit);
+            if (!replaceable.length) replaceable = base.map((t, i) => i);
+            const realKeys = new Set(all.map(l => l.map(lower).sort().join('|')));
+            realKeys.add(base.map(lower).sort().join('|'));
+            const out = new Set();
+            for (let tries = 0; tries < 300 && out.size < n; tries++) {
+                const arr = base.slice();
+                const k = Math.min(replaceable.length, (base.length >= 4 && Math.random() < 0.5) ? 2 : 1);
+                shuffleArr(replaceable).slice(0, k).forEach(i => { arr[i] = candidates[Math.floor(Math.random() * candidates.length)]; });
+                if (new Set(arr.map(lower)).size !== arr.length) continue;
+                if (realKeys.has(arr.map(lower).sort().join('|'))) continue;
+                out.add(arr.join(sep) + (end || ''));
+            }
+            return [...out];
+        }
+
         function renderQuizChoices(current) {
             const box = document.getElementById('quiz-choices');
-            let distractors;
+            let distractors = [];
             if (current.opts && current.opts.length) {
                 distractors = current.opts;
             } else {
                 const pool = quizBank.filter(x => x.a !== current.a);
                 const sameGroup = current.group ? pool.filter(x => x.group === current.group) : [];
-                const sameCat = pool.filter(x => x.cat === current.cat);
-                const len = current.a.length;
-                const similarLen = sameCat.filter(x => x.a.length >= len * 0.5 && x.a.length <= len * 1.8);
-                const source = sameGroup.length >= 3 ? sameGroup : (similarLen.length >= 3 ? similarLen : (sameCat.length >= 3 ? sameCat : pool));
-                distractors = shuffleArr(source).slice(0, 3).map(x => x.a);
+                if (current.near && sameGroup.length) {
+                    distractors = nearMisses(current.a, sameGroup.map(x => x.a), 3, current.near.sep, current.near.end);
+                }
+                if (distractors.length < 3 && sameGroup.length >= 3) {
+                    distractors = distractors.concat(mostSimilar(current.a, sameGroup.map(x => x.a).filter(a => !distractors.includes(a)), 3 - distractors.length));
+                }
+                if (distractors.length < 3) {
+                    const sameCat = pool.filter(x => x.cat === current.cat && !distractors.includes(x.a));
+                    const len = current.a.length;
+                    const similarLen = sameCat.filter(x => x.a.length >= len * 0.5 && x.a.length <= len * 1.8);
+                    const source = similarLen.length >= 3 ? similarLen : (sameCat.length >= 3 ? sameCat : pool.filter(x => !distractors.includes(x.a)));
+                    distractors = distractors.concat(shuffleArr(source).slice(0, 3 - distractors.length).map(x => x.a));
+                }
             }
             const options = shuffleArr([current.a, ...distractors]);
             box.innerHTML = options.map(opt => `<button class="auth-btn" style="margin-bottom:0; text-align:left; white-space:normal; line-height:1.4;" onclick="selectQuizAnswer(this, ${opt === current.a})">${escapeHtml(opt)}</button>`).join('');
