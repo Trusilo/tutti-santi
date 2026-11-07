@@ -299,12 +299,6 @@
                 <label>Wybierz swój profil:</label>
                 <select id="select-auth-pracownik">
                     <optgroup label="Kuchnia">
-                        <option value="Anton Lahir|Szef Kuchni|kuchnia">Anton Lahir (Szef Kuchni)</option>
-                        <option value="Kacper Szmagliński|Z-ca Szefa Kuchni|kuchnia">Kacper Szmagliński (Z-ca Szefa Kuchni)</option>
-                        <option value="Olaf Wójcik|Kucharz|kuchnia">Olaf Wójcik (Kucharz)</option>
-                        <option value="Nazar Yakivchuk|Kucharz|kuchnia">Nazar Yakivchuk (Kucharz)</option>
-                        <option value="Dmytro Yesypchuk|Kucharz|kuchnia">Dmytro Yesypchuk (Kucharz)</option>
-                        <option value="Hanna Vezdenko|Kucharz|kuchnia">Hanna Vezdenko (Kucharz)</option>
                         <option value="Ilya Sodel|Kucharz|kuchnia">Ilya Sodel (Kucharz)</option>
                     </optgroup>
                     <optgroup label="Sala / Kelnerzy">
@@ -319,9 +313,6 @@
                         <option value="Julia Lenartowicz|Kelner|sala">Julia Lenartowicz (Kelner)</option>
                         <option value="Mariia Baranova|Kelner|sala">Mariia Baranova (Kelner)</option>
                         <option value="Izabela Szamocka|Kelner|sala">Izabela Szamocka (Kelner)</option>
-                    </optgroup>
-                    <optgroup label="Zmywak">
-                        <option value="Jadwiga Chmiel|Zmywak|kuchnia">Jadwiga Chmiel (Zmywak)</option>
                     </optgroup>
                 </select>
                 <label style="margin-top:6px;">PIN:</label>
@@ -839,18 +830,12 @@
 
         let currentUser = { name: "", role: "", dept: "" };
         const staffByDept = {
-            kuchnia: ["Anton Lahir", "Kacper Szmagliński", "Olaf Wójcik", "Nazar Yakivchuk", "Dmytro Yesypchuk", "Hanna Vezdenko", "Ilya Sodel", "Jadwiga Chmiel"],
+            kuchnia: ["Ilya Sodel"],
             sala: ["Katarzyna Kysyluk", "Katarzyna Treder", "Katarzyna Żeleźnik", "Weronika Sawicka", "Aleksandra Godlewska", "Marita Formela", "Yeva Mikirtychan", "Dominik Śpica", "Julia Lenartowicz", "Mariia Baranova", "Izabela Szamocka"]
         };
         const CREDENTIALS = {
             "Yauheni Trusila": "914c948388ae30bdb0179a2f7bc91836d6af004171af735188fc1b69c286c864",
             "Karolina Irzyńska": "ac1964eb089654e01f7bfb4871e0cd31ea4d2aa6e6e48774b6b9917b1341dbf6",
-            "Anton Lahir": "0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c",
-            "Kacper Szmagliński": "edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9",
-            "Olaf Wójcik": "b3282a2f2a28757b3a18ab833de16a9c54518c0b0cf493e3f0a7cf09386f326a",
-            "Nazar Yakivchuk": "318aee3fed8c9d040d35a7fc1fa776fb31303833aa2de885354ddf3d44d8fb69",
-            "Dmytro Yesypchuk": "7a99d42d79e9bafeaa5ccedaf0135267da4ccd197a99131a8cf15025cb54ab18",
-            "Hanna Vezdenko": "79f06f8fde333461739f220090a23cb2a79f6d714bee100d0e4b4af249294619",
             "Ilya Sodel": "28fdc24c9abb066ea7343dc47c79a7cce15a581bcb30002a96903450bbe641a5",
             "Katarzyna Kysyluk": "85d6385b945c0d602103db39b0b654b2af93b5127938e26a959c123f0789b948",
             "Katarzyna Treder": "6c94e35ccc352d4e9ef0b99562cff995a5741ce8de8ad11b568892934daee366",
@@ -863,7 +848,6 @@
             "Julia Lenartowicz": "f37f3f2b0dc57a86dee4ba6ff855283bb4d2f0dea1c5bd1b708853444c2ffcec",
             "Mariia Baranova": "7d12ba56e9f8b3dc64f77c87318c4f37bc12cfbf1a37573cdf3e4fa683f20155",
             "Izabela Szamocka": "72d1b5da6eeaf1789df86487da50ad5e9dadb5ffaecb56b6de592aa286c9c1b8",
-            "Jadwiga Chmiel": "c1f330d0aff31c1c87403f1e4347bcc21aff7c179908723535f2b31723702525"
         };
 
         async function sha256Hex(str) {
@@ -1115,26 +1099,35 @@
         ];
         const audytQA = [
             { q: "Gość prosi o polecenie pizzy — co robisz?", a: "Aktywnie polecasz pizzę, wykazujesz się znajomością składników i dobierasz propozycję do gustu pytającego.",
-              opts: ["Mówisz, że wszystkie pizze są dobre i to subiektywna sprawa.", "Prosisz kolegę z kuchni, żeby wyszedł i doradził zamiast Ciebie.", "Odsyłasz gościa do karty dań bez komentarza."] },
+              opts: ["Aktywnie polecasz najdroższą pizzę, wykazujesz się znajomością cen i dobierasz propozycję do budżetu gościa.", "Biernie wskazujesz pizze w karcie, wykazujesz się znajomością składników i czekasz na decyzję gościa.", "Polecasz pizzę dnia, wykazujesz się znajomością składników i nie dopytujesz o gust gościa."] },
             { q: "Dlaczego pizza w Tutti Santi jest lekkostrawna?", a: "Bo nasze ciasto dojrzewa minimum 48 godzin.",
-              opts: ["Ciasto dojrzewa 24 godziny.", "Nasze ciasto w ogóle nie dojrzewa.", "Ciasto dojrzewa 72 godziny."] },
+              opts: ["Bo nasze ciasto dojrzewa minimum 24 godziny.", "Bo nasze ciasto dojrzewa minimum 72 godziny.", "Bo nasze ciasto dojrzewa minimum 12 godzin."] },
+            { q: "Czym różni się mąka czerwona od niebieskiej?", a: "Czasem dojrzewania i zawartością białka (niebieska 12 h, czerwona 24 h).",
+              opts: ["Producentem — mąki pochodzą od dwóch różnych firm.", "Grubością mielenia — jedna jest drobniej mielona od drugiej.", "Typem mąki — jedna jest mąką pełnoziarnistą, druga nie."] },
+            { q: "Dlaczego nasz sos pomidorowy nie ma przypraw?", a: "Bo sos nie ma dominować na pizzy — na pierwszym planie mają być składniki.",
+              opts: ["Bo w naszej restauracji w ogóle nie używamy przypraw.", "Bo część gości może mieć uczulenie na przyprawy.", "Bo przyprawy skracają trwałość sosu."] },
             { q: "Dlaczego nie mogę skomponować własnej pizzy?", a: "Mamy bardzo szeroki wybór pizz w karcie — na pewno znajdzie się coś odpowiedniego, ewentualnie można coś dodać lub odjąć.",
-              opts: ["Bo szef kuchni tego zabrania bez wyjątków.", "Bo nasz piec obsługuje tylko gotowe receptury.", "Bo to generuje dodatkowe koszty dla gościa."] },
+              opts: ["Mamy ograniczony wybór pizz w karcie — dlatego nie wolno zmieniać żadnych składników.", "Mamy bardzo szeroki wybór pizz w karcie — dlatego nie wolno niczego dodawać ani odejmować.", "Mamy bardzo szeroki wybór pizz w karcie — własną pizzę można skomponować za dopłatą."] },
             { q: "Czy są dostępne dania bezglutenowe?", a: "Nie ma dań w 100% bezglutenowych, ale mamy ciasto z mąki bezglutenowej — jesteśmy jednak pizzerią, więc śladowe ilości glutenu mogą się pojawić.",
-              opts: ["Tak, wszystkie dania są w 100% bezglutenowe.", "Nie, nie mamy żadnej opcji bezglutenowej.", "Tylko sałatki są bezglutenowe."] },
+              opts: ["Tak, mamy ciasto z mąki bezglutenowej i gwarantujemy, że pizza jest w 100% bezglutenowa.", "Nie ma dań w 100% bezglutenowych i nie mamy ciasta z mąki bezglutenowej — jesteśmy pizzerią.", "Nie ma dań w 100% bezglutenowych, ale mamy ciasto z mąki bezglutenowej — nie ma ryzyka śladowych ilości glutenu."] },
             { q: "Jaka kawa jest w ofercie restauracji?", a: "Lavazza Tierra Selection — ziarna z Ameryki Południowej: Nikaragua, Peru, Brazylia.",
-              opts: ["Illy Classico — ziarna z Afryki.", "Własna palarnia Tutti Santi.", "Segafredo Intermezzo."] },
+              opts: ["Lavazza Tierra Selection — ziarna z Afryki: Etiopia, Kenia, Uganda.", "Lavazza Qualità Rossa — ziarna z Ameryki Południowej: Peru, Brazylia, Kolumbia.", "Lavazza Tierra Selection — ziarna z Ameryki Południowej: Kolumbia, Ekwador, Boliwia."] },
             { q: "Jakie alergeny znajdują się w pizzy San Sebastiano?", a: "Kod QR znajduje się na ostatniej stronie menu — można zeskanować i sprawdzić, albo zapytać obsługi.",
-              opts: ["Trzeba to wiedzieć na pamięć, menu nie ma takiej informacji.", "Alergeny podajemy tylko telefonicznie do centrali.", "San Sebastiano nie zawiera żadnych alergenów."] },
+              opts: ["Kod QR znajduje się na pierwszej stronie menu — można zeskanować i sprawdzić, albo zapytać obsługi.", "Kod QR znajduje się na stoliku — można zeskanować i sprawdzić, albo zapytać obsługi.", "Alergeny podaje kelner z pamięci, bo zna skład każdej pizzy — nie trzeba niczego sprawdzać."] },
             { q: "Poproszono Cię o polecenie asortymentu z kredensu — co robisz?", a: "Trzeba coś konkretnego polecić, np. oliwę, mąkę, karczochy — cokolwiek z wystawki na kredensie.",
-              opts: ["Mówisz, że kredens jest tylko dekoracją.", "Odsyłasz gościa do managera.", "Proponujesz tylko napoje, bo kredens Cię nie dotyczy."] },
+              opts: ["Trzeba polecić wszystko z kredensu po kolei, bez wskazywania niczego konkretnego.", "Trzeba coś konkretnego polecić, ale tylko z karty dań, a nie z kredensu.", "Trzeba powiedzieć, że produkty z kredensu są tylko dekoracją lokalu."] },
             { q: "Jak przygotować się na pytania o aktualne nowości?", a: "Trzeba znać nowości, które mamy w danym sezonie — sprawdzać kartę i ogłoszenia na bieżąco.",
-              opts: ["Nowości nie zmieniają się nigdy, nie trzeba ich śledzić.", "Wystarczy znać tylko klasyczne pizze.", "To odpowiedzialność wyłącznie managera."] },
-            { q: "Czy semolina to inaczej mówiąc kasza manna?", a: "Nie.", opts: ["Tak.", "Tylko częściowo.", "To zależy od dostawcy."] },
-            { q: "Czy w Tutti Santi jest serwowana pizza neapolitańska?", a: "Nie.", opts: ["Tak.", "Tylko w wersji Gourmet.", "Tak, ale wyłącznie na wynos."] },
-            { q: "Czy dania makaronowe powinny być wydawane na ciepłych talerzach?", a: "Tak.", opts: ["Nie.", "Tylko latem.", "Zależy od rodzaju makaronu."] },
-            { q: "Czy stojak pod pizzę Gourmet dostarczamy niezwłocznie po przyjęciu zamówienia?", a: "Tak.", opts: ["Nie.", "Dopiero przy wydaniu dania.", "Tylko na życzenie gościa."] },
-            { q: "Czy standardem jest wydawanie pizz do 35 minut?", a: "Nie.", opts: ["Tak.", "Tak, ale tylko w weekendy.", "Zależy wyłącznie od obłożenia sali."] }
+              opts: ["Trzeba znać nowości z poprzedniego sezonu — sprawdzać kartę i ogłoszenia raz w miesiącu.", "Trzeba znać tylko nowości z karty napojów — resztę zna kuchnia.", "Trzeba znać nowości, które mamy w danym sezonie — wystarczy przeczytać je raz, na początku pracy."] },
+            { q: "Czy semolina to inaczej mówiąc kasza manna?", a: "Nie — semolina z pszenicy durum tylko przypomina kaszę mannę.",
+              opts: ["Tak — to dwie nazwy tego samego produktu.", "Tak — różnią się tylko opakowaniem i ceną.", "Nie — semolina to mąka kukurydziana, a kasza manna jest pszenna."] },
+            { q: "Czy w Tutti Santi jest serwowana pizza neapolitańska?", a: "Nie — nasza pizza klasyczna ma chrupiące ciasto, a neapolitańska miękkie i lejące.",
+              opts: ["Tak — nasza pizza klasyczna to pizza neapolitańska.", "Tak — ale tylko w wersji Gourmet.", "Nie — nasza pizza klasyczna ma lejące ciasto, a neapolitańska chrupiące."] },
+            { q: "Czy dania makaronowe powinny być wydawane na ciepłych talerzach?", a: "Tak — makaron wydajemy na ciepłym talerzu, żeby nie stygł.",
+              opts: ["Nie — makaron wydajemy na zimnym talerzu, żeby nie dogotowywał się.", "Tak — ale tylko zimą, latem wydajemy na zimnych.", "Nie — ciepłe talerze są tylko do dań z piekarnika."] },
+            { q: "Czy stojak pod pizzę Gourmet dostarczamy niezwłocznie po przyjęciu zamówienia?", a: "Tak — stojak podajemy od razu po przyjęciu zamówienia, zanim pizza będzie gotowa.",
+              opts: ["Nie — stojak podajemy razem z pizzą, w momencie wydania.", "Tak — ale dopiero po wydaniu napojów.", "Nie — stojak podajemy tylko na prośbę gościa."] },
+            { q: "Czy standardem jest wydawanie pizz do 35 minut?", a: "Nie, to nie jest nasz standard.",
+              opts: ["Tak, każda pizza powinna wyjść najpóźniej po 35 minutach.", "Tak, ale tylko w godzinach szczytu.", "Tak, ale tylko dla pizz klasycznych."] }
         ];
 
         function renderMenu() {
